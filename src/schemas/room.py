@@ -9,9 +9,10 @@ from schemas.pagination import PaginationParams
 
 
 class RoomParams(PaginationParams):
-    hotel_id: PositiveInt | None = None
+    hotel_id: Annotated[PositiveInt | None, Field(description="Сортировка по отелю")] = None
     date_from: date = Field(default_factory=lambda: date.today())
     date_to: FutureDate = Field(default_factory=lambda: date.today() + timedelta(days=1))
+    room_type: Annotated[RoomType | None, Field(description="Сортировка по типу комнаты")] = None
 
     @model_validator(mode="after")
     def validate_date(self):

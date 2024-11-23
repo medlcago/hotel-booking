@@ -11,5 +11,5 @@ class PaginationResponse(BaseModel, Generic[ModelType]):
 
 
 class PaginationParams(BaseModel):
-    limit: Annotated[int, Field(ge=1)] = 10
+    limit: Annotated[int, Field(ge=1, le=10)] = 10
     offset: Annotated[int, Field(ge=0)] = 0
