@@ -46,7 +46,7 @@ def create_token(
         lifetime: timedelta = DEFAULT_TOKEN_LIFETIME
 ) -> str:
     payload = dict(
-        sub=identity,
+        identity=identity,
         iat=datetime.now(UTC),
         exp=datetime.now(UTC) + lifetime,
         token_type=token_type,
@@ -94,11 +94,11 @@ def decode_token(token: str) -> dict[str, Any]:
 
 def get_identity(token: str, token_type: TokenType | None = None) -> int | None:
     payload = decode_token(token=token)
-    if not (payload and payload.get("sub")):
+    if not (payload and payload.get("identity")):
         return
     if token_type and payload.get("token_type") != token_type:
         return
-    return payload.get("sub")
+    return payload.get("identity")
 
 
 class JWTBearer(HTTPBearer):
