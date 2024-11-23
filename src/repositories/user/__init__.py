@@ -1,6 +1,7 @@
 from typing import Protocol, Any
 
 from models import User
+from repositories.base import Result
 from .user_repo import UserRepository
 
 
@@ -12,4 +13,7 @@ class IUserRepository(Protocol):
         ...
 
     async def get_user_by_email(self, email: str) -> User | None:
+        ...
+
+    async def get_users(self, limit: int, offset: int, **kwargs) -> Result[User]:
         ...
