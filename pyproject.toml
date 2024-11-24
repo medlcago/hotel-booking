@@ -20,6 +20,7 @@ bcrypt = "^4.2.0"
 pyjwt = "^2.9.0"
 prometheus-fastapi-instrumentator = "^7.0.0"
 fastapi-cache2 = "^0.2.2"
+pyyaml = "^6.0.2"
 
 
 [build-system]

@@ -1,8 +1,8 @@
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 from typing import Annotated
 
-from pydantic import BaseModel, PositiveInt, Field, FutureDate, model_validator
+from pydantic import BaseModel, PositiveInt, Field, model_validator
 
 from enums.room import RoomType
 from schemas.pagination import PaginationParams
@@ -10,13 +10,15 @@ from schemas.pagination import PaginationParams
 
 class RoomParams(PaginationParams):
     hotel_id: Annotated[PositiveInt | None, Field(description="Сортировка по отелю")] = None
-    date_from: date = Field(default_factory=lambda: date.today())
-    date_to: FutureDate = Field(default_factory=lambda: date.today() + timedelta(days=1))
+    date_from: date
+    date_to: date
     room_type: Annotated[RoomType | None, Field(description="Сортировка по типу комнаты")] = None
 
     @model_validator(mode="after")
     def validate_date(self):
-        if self.date_from > self.date_to:
+        if self.date_from < date.today():
+            raise ValueError("date_from must be today or later")
+        if self.date_from >= self.date_to:
             raise ValueError("date_from must be before date_to")
         return self
 

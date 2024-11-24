@@ -11,9 +11,10 @@ class ReviewRepository(Repository[Review]):
     table = Review
 
     async def add_review(self, values: dict[str, Any]) -> Review:
+        review_stmt = insert(self.table).values(**values).returning(self.table)
         try:
-            review_stmt = insert(self.table).values(**values).returning(self.table)
-            return await self.session.scalar(review_stmt)
+            async with self.session_factory() as session:
+                return await session.scalar(review_stmt)
         except IntegrityError:
             raise AlreadyExistsError
 
@@ -33,17 +34,20 @@ class ReviewRepository(Repository[Review]):
         )
         count_stmt = select(func.count(self.table.id)).filter_by(**kwargs)
 
-        reviews = (await self.session.scalars(reviews_stmt)).all()
-        count = await self.session.scalar(count_stmt)
-        return Result(
-            count=count,
-            items=reviews,
-        )
+        async with self.session_factory() as session:
+            reviews = (await session.scalars(reviews_stmt)).all()
+            count = await session.scalar(count_stmt)
+            return Result(
+                count=count,
+                items=reviews,
+            )
 
     async def get_review_by_id(self, review_id: int) -> Review | None:
         review_stmt = select(self.table).filter_by(id=review_id)
-        return await self.session.scalar(review_stmt)
+        async with self.session_factory() as session:
+            return await session.scalar(review_stmt)
 
     async def delete_review(self, review_id: int, user_id: int) -> None:
         review_stmt = delete(self.table).filter_by(id=review_id, user_id=user_id)
-        await self.session.execute(review_stmt)
+        async with self.session_factory() as session:
+            await session.execute(review_stmt)

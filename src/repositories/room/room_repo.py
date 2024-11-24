@@ -12,15 +12,17 @@ class RoomRepository(Repository[Room]):
     table = Room
 
     async def add_room(self, values: dict[str, Any]) -> Room:
+        room_stmt = insert(self.table).values(**values).returning(self.table)
         try:
-            room_stmt = insert(self.table).values(**values).returning(self.table)
-            return await self.session.scalar(room_stmt)
+            async with self.session_factory() as session:
+                return await session.scalar(room_stmt)
         except IntegrityError:
             raise AlreadyExistsError
 
     async def get_room_by_id(self, room_id: int) -> Room | None:
         room_stmt = select(self.table).filter_by(id=room_id)
-        return await self.session.scalar(room_stmt)
+        async with self.session_factory() as session:
+            return await session.scalar(room_stmt)
 
     async def get_rooms(
             self,
@@ -43,6 +45,7 @@ class RoomRepository(Repository[Room]):
                         Booking.date_to > date_from,
                     ),
                 ),
+                Booking.status
             )
         ).cte("booking_rooms")
 
@@ -59,9 +62,10 @@ class RoomRepository(Repository[Room]):
             filter(self.table.id.notin_(select(cte.c.room_id)))
         )
 
-        rooms = (await self.session.scalars(rooms_stmt)).all()
-        count = await self.session.scalar(count_stmt)
-        return Result(
-            count=count,
-            items=rooms,
-        )
+        async with self.session_factory() as session:
+            rooms = (await session.scalars(rooms_stmt)).all()
+            count = await session.scalar(count_stmt)
+            return Result(
+                count=count,
+                items=rooms,
+            )

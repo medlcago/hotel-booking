@@ -11,9 +11,10 @@ class BookingRepository(Repository[Booking]):
         bookings_stmt = select(self.table).filter_by(user_id=user_id, **kwargs)
         count_stmt = select(func.count(self.table.id)).filter_by(**kwargs)
 
-        bookings = (await self.session.scalars(bookings_stmt)).all()
-        count = await self.session.scalar(count_stmt)
-        return Result(
-            count=count,
-            items=bookings
-        )
+        async with self.session_factory() as session:
+            bookings = (await session.scalars(bookings_stmt)).all()
+            count = await session.scalar(count_stmt)
+            return Result(
+                count=count,
+                items=bookings
+            )

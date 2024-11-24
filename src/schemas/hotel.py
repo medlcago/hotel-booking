@@ -7,7 +7,7 @@ from schemas.pagination import PaginationParams
 
 
 class HotelParams(PaginationParams):
-    sort_order: Annotated[Literal["asc", "desc"], Field(description="Сортировка по рейтингу")] = "asc"
+    sort_order: Annotated[Literal["asc", "desc"], Field(description="Сортировка по рейтингу")] = "desc"
     location: Annotated[str | None, Field(description="Сортировка по локации")] = None
 
 

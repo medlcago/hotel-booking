@@ -1,5 +1,5 @@
 from datetime import timedelta
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from pydantic import BaseModel, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -47,6 +47,8 @@ class Settings(BaseSettings):
     debug: bool
     access_token_lifetime: timedelta = timedelta(minutes=30)
     refresh_token_lifetime: timedelta = timedelta(days=1)
+
+    log_config: PurePath = BASE_DIR / "log_conf.yaml"
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",

@@ -1,5 +1,6 @@
+from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass
-from typing import Generic, TypeVar, Type, Sequence
+from typing import Generic, TypeVar, Type, Sequence, Callable
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,5 +20,5 @@ class Result(Generic[ModelType]):
 class Repository(Generic[ModelType]):
     table: Type[ModelType]
 
-    def __init__(self, session: AsyncSession):
-        self.session = session
+    def __init__(self, session_factory: Callable[..., AbstractAsyncContextManager[AsyncSession]]) -> None:
+        self.session_factory = session_factory

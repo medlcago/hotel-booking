@@ -9,6 +9,7 @@ from api import init_api_router
 from api.metrics import init_metrics
 from core.container import Container
 from core.exceptions import init_exception_handlers
+from core.settings import settings
 
 
 class APIServer:
@@ -33,7 +34,7 @@ class APIServer:
     def run(self, host: str = "0.0.0.0", port: int = 8000):
         import uvicorn
         app = self._build_app()
-        uvicorn.run(app, host=host, port=port)
+        uvicorn.run(app, host=host, port=port, log_config=str(settings.log_config))
 
 
 if __name__ == "__main__":

@@ -12,8 +12,9 @@ class HotelRepository(Repository[Hotel]):
 
     async def add_hotel(self, values: dict[str, Any]) -> Hotel:
         hotel_stmt = insert(self.table).values(**values).returning(self.table)
-        hotel = await self.session.scalar(hotel_stmt)
-        return hotel
+        async with self.session_factory() as session:
+            hotel = await session.scalar(hotel_stmt)
+            return hotel
 
     async def get_hotel_by_id(self, hotel_id: int) -> Hotel | None:
         hotel_stmt = (
@@ -21,7 +22,8 @@ class HotelRepository(Repository[Hotel]):
             filter_by(id=hotel_id).
             options(selectinload(self.table.rooms), undefer(self.table.rating))  # noqa
         )
-        return await self.session.scalar(hotel_stmt)
+        async with self.session_factory() as session:
+            return await session.scalar(hotel_stmt)
 
     async def get_hotels(
             self,
@@ -44,9 +46,10 @@ class HotelRepository(Repository[Hotel]):
             hotels_stmt = hotels_stmt.filter(self.table.location.ilike(f"%{location}%"))
             count_stmt = count_stmt.filter(self.table.location.ilike(f"%{location}%"))
 
-        hotels = (await self.session.scalars(hotels_stmt)).all()
-        count = (await self.session.scalar(count_stmt))
-        return Result(
-            count=count,
-            items=hotels,
-        )
+        async with self.session_factory() as session:
+            hotels = (await session.scalars(hotels_stmt)).all()
+            count = (await session.scalar(count_stmt))
+            return Result(
+                count=count,
+                items=hotels,
+            )

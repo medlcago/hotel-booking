@@ -14,6 +14,7 @@ class UserParams(PaginationParams):
 
 
 class UserResponse(BaseModel):
+    id: int
     full_name: str
     email: str
     phone: str | None = None

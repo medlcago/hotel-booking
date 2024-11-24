@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
@@ -18,8 +18,8 @@ if TYPE_CHECKING:
 class Booking(Base):
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    date_from: Mapped[datetime]
-    date_to: Mapped[datetime]
+    date_from: Mapped[date]
+    date_to: Mapped[date]
     price_per_day: Mapped[Decimal]
     status: Mapped[bool] = mapped_column(default=True, server_default="1")
 
