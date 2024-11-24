@@ -10,6 +10,10 @@ class APIException(Exception):
     message: str = HTTPStatus.INTERNAL_SERVER_ERROR.phrase
     description: str = HTTPStatus.INTERNAL_SERVER_ERROR.description
 
+    def __init__(self, description: str | None = None):
+        if description is not None:
+            self.description = description
+
     def __str__(self) -> str:
         return f"<{self.status_code} - {self.message}>: {self.description}"
 

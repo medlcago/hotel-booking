@@ -8,14 +8,14 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.base import Base
+from models.base import Base, TimeStampMixin
 
 if TYPE_CHECKING:
     from models import User
     from models import Room
 
 
-class Booking(Base):
+class Booking(Base, TimeStampMixin):
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     date_from: Mapped[date]

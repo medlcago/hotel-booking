@@ -58,6 +58,12 @@ class RepositoryContainer(containers.DeclarativeContainer):
 
 
 class ServiceContainer(containers.DeclarativeContainer):
+    wiring_config = containers.WiringConfiguration(
+        modules=[
+            "api.deps",
+        ]
+    )
+
     repositories = providers.Container(
         RepositoryContainer,
     )
@@ -90,6 +96,7 @@ class ServiceContainer(containers.DeclarativeContainer):
     booking_service = providers.Factory(
         BookingService,
         booking_repository=repositories.booking_repository,
+        room_repository=repositories.room_repository,
     )
 
 
@@ -102,7 +109,6 @@ class Container(containers.DeclarativeContainer):
             "api.v1.rooms.rooms",
             "api.v1.reviews.reviews",
             "api.v1.bookings.bookings",
-            "api.deps",
         ]
     )
 
