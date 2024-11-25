@@ -20,8 +20,19 @@ class BookingRepository(Repository[Booking]):
         async with self.session_factory() as session:
             await session.execute(booking_stmt)
 
-    async def get_user_bookings(self, user_id: int, **kwargs) -> Result[Booking]:
-        bookings_stmt = select(self.table).filter_by(user_id=user_id, **kwargs)
+    async def get_user_bookings(
+            self,
+            user_id: int,
+            limit: int,
+            offset: int,
+            **kwargs
+    ) -> Result[Booking]:
+        bookings_stmt = (
+            select(self.table).
+            filter_by(user_id=user_id, **kwargs).
+            limit(limit=limit).
+            offset(offset)
+        )
         count_stmt = select(func.count(self.table.id)).filter_by(**kwargs)
 
         async with self.session_factory() as session:

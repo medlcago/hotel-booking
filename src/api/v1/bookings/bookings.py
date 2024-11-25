@@ -1,10 +1,12 @@
+from typing import Annotated
+
 from dependency_injector.wiring import inject, Provide
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, Query
 from fastapi_cache.decorator import cache
 
 from api.deps import CurrentUser
 from core.container import Container
-from schemas.booking import BookingCreateRequest, BookingCreateResponse, BookingResponse
+from schemas.booking import BookingCreateRequest, BookingCreateResponse, BookingResponse, BookingParams
 from schemas.pagination import PaginationResponse
 from use_cases.booking import IBookingUseCase
 
@@ -47,6 +49,7 @@ async def get_booking(
 @inject
 async def get_bookings(
         user: CurrentUser,
+        params: Annotated[BookingParams, Query()],
         booking_use_case: IBookingUseCase = Depends(Provide[Container.booking_use_case])
 ):
-    return await booking_use_case.get_bookings(user_id=user.id)
+    return await booking_use_case.get_bookings(user_id=user.id, params=params)

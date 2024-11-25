@@ -13,7 +13,13 @@ class IBookingRepository(Protocol):
     async def cancel_booking(self, booking_id: int) -> None:
         ...
 
-    async def get_user_bookings(self, user_id: int, **kwargs) -> Result[Booking]:
+    async def get_user_bookings(
+            self,
+            user_id: int,
+            limit: int,
+            offset: int,
+            **kwargs
+    ) -> Result[Booking]:
         ...
 
     async def get_room_booking(self, room_id: int, date_from: date, date_to: date) -> Booking | None:

@@ -4,7 +4,7 @@ from datetime import date
 from core.exceptions import BadRequestException, ForbiddenException
 from repositories.booking import IBookingRepository
 from repositories.room import IRoomRepository
-from schemas.booking import BookingCreateRequest, BookingResponse, BookingCreateResponse
+from schemas.booking import BookingCreateRequest, BookingResponse, BookingCreateResponse, BookingParams
 from schemas.pagination import PaginationResponse
 
 
@@ -38,8 +38,11 @@ class BookingService:
             raise ForbiddenException("You are not allowed to cancel this")
         await self.booking_repository.cancel_booking(booking_id=booking_id)
 
-    async def get_bookings(self, user_id: int) -> PaginationResponse[BookingResponse]:
-        result = await self.booking_repository.get_user_bookings(user_id=user_id)
+    async def get_bookings(self, user_id: int, params: BookingParams) -> PaginationResponse[BookingResponse]:
+        result = await self.booking_repository.get_user_bookings(
+            user_id=user_id,
+            **params.model_dump(exclude_none=True)
+        )
         return PaginationResponse[BookingResponse].model_validate(
             result,
             from_attributes=True

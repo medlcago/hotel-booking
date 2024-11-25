@@ -3,6 +3,12 @@ from decimal import Decimal
 
 from pydantic import BaseModel, PositiveInt, model_validator
 
+from schemas.pagination import PaginationParams
+
+
+class BookingParams(PaginationParams):
+    status: bool | None = None
+
 
 class BookingCreateRequest(BaseModel):
     room_id: PositiveInt

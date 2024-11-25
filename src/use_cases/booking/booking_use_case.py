@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from schemas.booking import BookingCreateRequest, BookingResponse, BookingCreateResponse
+from schemas.booking import BookingCreateRequest, BookingResponse, BookingCreateResponse, BookingParams
 from schemas.pagination import PaginationResponse
 from services.booking import IBookingService
 
@@ -15,8 +15,8 @@ class BookingUseCase:
     async def cancel_booking(self, booking_id: int, user_id: int) -> None:
         return await self.booking_service.cancel_booking(booking_id=booking_id, user_id=user_id)
 
-    async def get_bookings(self, user_id: int) -> PaginationResponse[BookingResponse]:
-        bookings = await self.booking_service.get_bookings(user_id=user_id)
+    async def get_bookings(self, user_id: int, params: BookingParams) -> PaginationResponse[BookingResponse]:
+        bookings = await self.booking_service.get_bookings(user_id=user_id, params=params)
         return bookings
 
     async def get_booking(self, booking_id: int, user_id: int) -> BookingResponse:
