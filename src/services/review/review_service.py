@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from core.exceptions import BadRequestException
+from core.exceptions import BadRequestException, ForbiddenException
 from repositories.base import AlreadyExistsError
 from repositories.review import IReviewRepository
 from schemas.pagination import PaginationResponse
@@ -23,7 +23,7 @@ class ReviewService:
         return PaginationResponse[ReviewResponse].model_validate(result, from_attributes=True)
 
     async def delete_review(self, review_id: int, user_id: int) -> None:
-        review = await self.review_repository.get_review_by_id(review_id=review_id)
-        if not review or review.user_id != user_id:
-            raise BadRequestException
+        review = await self.review_repository.get_user_review(review_id=review_id, user_id=user_id)
+        if not review:
+            raise ForbiddenException("You do not have permission to delete a review")
         await self.review_repository.delete_review(review_id=review_id, user_id=user_id)

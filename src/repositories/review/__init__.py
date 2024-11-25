@@ -18,7 +18,7 @@ class IReviewRepository(Protocol):
     ) -> Result[Any]:
         ...
 
-    async def get_review_by_id(self, review_id: int) -> Review | None:
+    async def get_user_review(self, review_id: int, user_id: int) -> Review | None:
         ...
 
     async def delete_review(self, review_id: int, user_id: int) -> None:

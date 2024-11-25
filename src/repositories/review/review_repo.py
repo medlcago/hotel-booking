@@ -24,7 +24,7 @@ class ReviewRepository(Repository[Review]):
             offset: int,
             sort_order: Literal["asc", "desc"],
             **kwargs,
-    ) -> Result[Any]:
+    ) -> Result[Review]:
         reviews_stmt = (
             select(self.table).
             limit(limit).
@@ -42,8 +42,8 @@ class ReviewRepository(Repository[Review]):
                 items=reviews,
             )
 
-    async def get_review_by_id(self, review_id: int) -> Review | None:
-        review_stmt = select(self.table).filter_by(id=review_id)
+    async def get_user_review(self, review_id: int, user_id: int) -> Review | None:
+        review_stmt = select(self.table).filter_by(id=review_id, user_id=user_id)
         async with self.session_factory() as session:
             return await session.scalar(review_stmt)
 
