@@ -35,6 +35,9 @@ async def sign_in(
 
 
 @router.post("/refresh-token", response_model=Token)
-async def refresh_token(token: RefreshToken):
-    # TODO implement logic
-    pass
+@inject
+async def refresh_token(
+        schema: RefreshToken,
+        auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
+):
+    return await auth_use_case.refresh_token(schema=schema)

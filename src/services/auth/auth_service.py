@@ -45,9 +45,9 @@ class AuthService:
             refresh_token=refresh_token
         )
 
-    async def refresh_token(self, token: RefreshToken) -> Token:
+    async def refresh_token(self, schema: RefreshToken) -> Token:
         user_id = security.get_identity(
-            token=token.refresh_token,
+            token=schema.refresh_token,
             token_type=TokenType.refresh
         )
         if not user_id:

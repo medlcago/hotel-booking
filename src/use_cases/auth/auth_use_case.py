@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from schemas.auth import SignInRequest
 from schemas.auth import SignUpRequest
-from schemas.token import Token
+from schemas.token import Token, RefreshToken
 from services.auth import IAuthService
 
 
@@ -17,3 +17,6 @@ class AuthUseCase:
     async def login(self, schema: SignInRequest) -> Token:
         token = await self.auth_service.sign_in(schema=schema)
         return token
+
+    async def refresh_token(self, schema: RefreshToken) -> Token:
+        return await self.auth_service.refresh_token(schema=schema)

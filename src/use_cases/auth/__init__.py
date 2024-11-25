@@ -2,7 +2,7 @@ from typing import Protocol
 
 from schemas.auth import SignInRequest
 from schemas.auth import SignUpRequest
-from schemas.token import Token
+from schemas.token import Token, RefreshToken
 from .auth_use_case import AuthUseCase
 
 
@@ -11,4 +11,7 @@ class IAuthUseCase(Protocol):
         ...
 
     async def login(self, schema: SignInRequest) -> Token:
+        ...
+
+    async def refresh_token(self, schema: RefreshToken) -> Token:
         ...

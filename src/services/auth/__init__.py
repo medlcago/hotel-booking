@@ -22,5 +22,5 @@ class IAuthService(Protocol):
     def get_token(user_id: int) -> Token:
         ...
 
-    async def refresh_token(self, token: RefreshToken) -> Token:
+    async def refresh_token(self, schema: RefreshToken) -> Token:
         ...
