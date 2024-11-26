@@ -3,10 +3,10 @@ from decimal import Decimal
 
 from pydantic import BaseModel, PositiveInt, model_validator
 
-from schemas.pagination import PaginationParams
+from schemas.filters import LimitOffset
 
 
-class BookingParams(PaginationParams):
+class BookingParams(LimitOffset):
     status: bool | None = None
 
 

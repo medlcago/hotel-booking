@@ -1,15 +1,10 @@
-from typing import Annotated, TypeVar, Generic
+from typing import Generic
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-ModelType = TypeVar("ModelType", bound=BaseModel)
+from core.types import ModelType
 
 
 class PaginationResponse(BaseModel, Generic[ModelType]):
     count: int
     items: list[ModelType]
-
-
-class PaginationParams(BaseModel):
-    limit: Annotated[int, Field(ge=1, le=10)] = 10
-    offset: Annotated[int, Field(ge=0)] = 0

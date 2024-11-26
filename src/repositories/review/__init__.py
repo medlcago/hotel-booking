@@ -1,5 +1,6 @@
-from typing import Protocol, Any, Literal
+from typing import Protocol, Any
 
+from core.types import SortOrderType
 from models import Review
 from repositories.base import Result
 from .review_repo import ReviewRepository
@@ -13,9 +14,10 @@ class IReviewRepository(Protocol):
             self,
             limit: int,
             offset: int,
-            sort_order: Literal["asc", "desc"],
+            field: str = "id",
+            sort_order: SortOrderType = "asc",
             **kwargs,
-    ) -> Result[Any]:
+    ) -> Result[Review]:
         ...
 
     async def get_user_review(self, review_id: int, user_id: int) -> Review | None:

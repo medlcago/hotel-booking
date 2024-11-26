@@ -1,14 +1,16 @@
 from datetime import datetime
-from typing import Annotated, Literal
+from typing import Annotated
 
 from pydantic import BaseModel, PositiveInt, Field
 
-from schemas.pagination import PaginationParams
+from core.types import SortOrderType
+from schemas.filters import LimitOffset, OrderBy
 
 
-class ReviewParams(PaginationParams):
-    sort_order: Annotated[Literal["asc", "desc"], Field(description="Сортировка по дате создания")] = "asc"
+class ReviewParams(LimitOffset, OrderBy):
     hotel_id: Annotated[PositiveInt | None, Field(description="Сортировка по отелю")] = None
+    field: str = "created_at"
+    sort_order: SortOrderType = "desc"
 
 
 class ReviewCreateRequest(BaseModel):

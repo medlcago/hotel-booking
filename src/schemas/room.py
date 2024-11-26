@@ -5,10 +5,10 @@ from typing import Annotated
 from pydantic import BaseModel, PositiveInt, Field, model_validator
 
 from enums.room import RoomType
-from schemas.pagination import PaginationParams
+from schemas.filters import LimitOffset
 
 
-class RoomParams(PaginationParams):
+class RoomParams(LimitOffset):
     hotel_id: Annotated[PositiveInt | None, Field(description="Сортировка по отелю")] = None
     date_from: date
     date_to: date

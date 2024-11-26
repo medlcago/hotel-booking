@@ -1,14 +1,16 @@
-from typing import Annotated, Literal
+from typing import Annotated
 
 import phonenumbers
 from pydantic import BaseModel, Field, EmailStr, model_validator, PositiveInt
 
-from schemas.pagination import PaginationParams
+from core.types import SortOrderType
+from schemas.filters import LimitOffset, OrderBy
 
 
-class HotelParams(PaginationParams):
-    sort_order: Annotated[Literal["asc", "desc"], Field(description="Сортировка по рейтингу")] = "desc"
+class HotelParams(LimitOffset, OrderBy):
     location: Annotated[str | None, Field(description="Сортировка по локации")] = None
+    field: str = "rating"
+    sort_order: SortOrderType = "desc"
 
 
 class HotelCreateRequest(BaseModel):

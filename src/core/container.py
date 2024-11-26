@@ -25,7 +25,7 @@ class RepositoryContainer(containers.DeclarativeContainer):
     db = providers.Singleton(
         Database,
         url=settings.db.dsn,
-        echo=settings.debug,
+        echo=settings.db.echo,
         pool_size=settings.db.pool_size,
         max_overflow=settings.db.max_overflow,
         pool_timeout=settings.db.pool_timeout

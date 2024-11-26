@@ -1,5 +1,6 @@
-from typing import Protocol, Any, Literal
+from typing import Protocol, Any
 
+from core.types import SortOrderType
 from models import Hotel
 from repositories.base import Result
 from .hotel_repo import HotelRepository
@@ -16,7 +17,8 @@ class IHotelRepository(Protocol):
             self,
             limit: int,
             offset: int,
-            sort_order: Literal["asc", "desc"] = "asc",
+            field: str = "id",
+            sort_order: SortOrderType = "asc",
             location: str | None = None,
             **kwargs
     ) -> Result[Hotel]:

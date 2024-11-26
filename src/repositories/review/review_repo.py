@@ -1,8 +1,9 @@
-from typing import Any, Literal
+from typing import Any
 
 from sqlalchemy import insert, select, func, delete
 from sqlalchemy.exc import IntegrityError
 
+from core.types import SortOrderType
 from models import Review
 from repositories.base import Repository, AlreadyExistsError, Result
 
@@ -22,16 +23,20 @@ class ReviewRepository(Repository[Review]):
             self,
             limit: int,
             offset: int,
-            sort_order: Literal["asc", "desc"],
+            field: str = "id",
+            sort_order: SortOrderType = "asc",
             **kwargs,
     ) -> Result[Review]:
         reviews_stmt = (
             select(self.table).
             limit(limit).
             offset(offset).
-            filter_by(**kwargs).
-            order_by(self.table.created_at.desc() if sort_order == "desc" else self.table.created_at.asc())
+            filter_by(**kwargs)
         )
+        if column := getattr(self.table, field, None):
+            reviews_stmt = reviews_stmt.order_by(
+                column.desc() if sort_order == "desc" else column.asc()  # noqa
+            )
         count_stmt = select(func.count(self.table.id)).filter_by(**kwargs)
 
         async with self.session_factory() as session:

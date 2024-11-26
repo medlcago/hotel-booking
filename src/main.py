@@ -2,23 +2,30 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 from fastapi import FastAPI
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
 
 from api import init_api_router
 from api.metrics import init_metrics
 from core.container import Container
 from core.exceptions import init_exception_handlers
 from core.settings import settings
+from utils.cache import init_cache
 
 
 class APIServer:
     def __init__(self):
-        self.app = FastAPI(title="Hotel Booking API", lifespan=self.lifespan)
+        self.app = FastAPI(
+            title="Hotel Booking API",
+            lifespan=self.lifespan,
+            debug=settings.debug
+        )
 
     @asynccontextmanager
     async def lifespan(self, _: FastAPI) -> AsyncIterator[None]:
-        FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache", expire=60)
+        await init_cache(
+            redis_url=settings.redis.url if settings.redis and not settings.debug else None,
+            prefix="fastapi-cache",
+            expire=60,
+        )
         yield
 
     def _build_app(self) -> FastAPI:

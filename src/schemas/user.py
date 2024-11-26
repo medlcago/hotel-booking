@@ -3,10 +3,10 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
-from schemas.pagination import PaginationParams
+from schemas.filters import LimitOffset
 
 
-class UserParams(PaginationParams):
+class UserParams(LimitOffset):
     limit: Annotated[int, Field(ge=1, le=100)] = 100
     is_active: bool | None = None
     is_verified: bool | None = None

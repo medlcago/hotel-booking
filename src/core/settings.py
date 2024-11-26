@@ -18,6 +18,7 @@ class Database(BaseModel):
     pool_size: int = 5
     max_overflow: int = 10
     pool_timeout: int = 10
+    echo: bool = False
 
     naming_convention: dict[str, str] = {
         "ix": "ix_%(column_0_label)s",
@@ -40,9 +41,14 @@ class Database(BaseModel):
         ).render_as_string(hide_password=False)
 
 
+class Redis(BaseModel):
+    url: str
+
+
 class Settings(BaseSettings):
     secret_key: SecretStr
     db: Database
+    redis: Redis | None = None
 
     debug: bool
     access_token_lifetime: timedelta = timedelta(minutes=30)

@@ -2,6 +2,7 @@ volumes:
   postgres_data:
   prometheus_data:
   grafana_data:
+  redis_data:
 
 
 services:
@@ -45,6 +46,7 @@ services:
 
   grafana:
     image: grafana/grafana:11.2.4
+    container_name: grafana
     depends_on:
       - prometheus
     ports:
@@ -65,3 +67,12 @@ services:
     depends_on:
       - hotel_booking
     restart: always
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: always
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data

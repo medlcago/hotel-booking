@@ -1,8 +1,9 @@
-from typing import Any, Literal
+from typing import Any
 
 from sqlalchemy import insert, select, func
 from sqlalchemy.orm import selectinload, undefer
 
+from core.types import SortOrderType
 from models import Hotel
 from repositories.base import Repository, Result
 
@@ -29,7 +30,8 @@ class HotelRepository(Repository[Hotel]):
             self,
             limit: int,
             offset: int,
-            sort_order: Literal["asc", "desc"] = "asc",
+            field: str = "id",
+            sort_order: SortOrderType = "asc",
             location: str | None = None,
             **kwargs
     ) -> Result[Hotel]:
@@ -38,9 +40,12 @@ class HotelRepository(Repository[Hotel]):
             limit(limit).
             offset(offset).
             filter_by(**kwargs).
-            options(undefer(self.table.rating)).  # noqa
-            order_by(self.table.rating.desc() if sort_order == "desc" else self.table.rating.asc())  # noqa
+            options(undefer(self.table.rating))  # noqa
         )
+        if column := getattr(self.table, field, None):
+            hotels_stmt = hotels_stmt.order_by(
+                column.desc() if sort_order == "desc" else column.asc()  # noqa
+            )
         count_stmt = select(func.count(self.table.id)).filter_by(**kwargs)
         if location:
             hotels_stmt = hotels_stmt.filter(self.table.location.ilike(f"%{location}%"))
