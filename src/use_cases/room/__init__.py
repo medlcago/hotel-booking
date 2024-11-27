@@ -1,7 +1,13 @@
 from typing import Protocol
 
 from schemas.pagination import PaginationResponse
-from schemas.room import RoomCreateRequest, RoomResponse, RoomCreateResponse, RoomParams
+from schemas.room import (
+    RoomCreateRequest,
+    RoomResponse,
+    RoomCreateResponse,
+    RoomParams,
+    RoomUpdate
+)
 from .room_use_case import RoomUseCase
 
 
@@ -15,5 +21,5 @@ class IRoomUseCase(Protocol):
     async def get_rooms(self, params: RoomParams) -> PaginationResponse[RoomResponse]:
         ...
 
-    async def book_room(self, room_id: int, hotel_id: int) -> RoomResponse:
+    async def update_room(self, room_id: int, schema: RoomUpdate) -> RoomUpdate:
         ...

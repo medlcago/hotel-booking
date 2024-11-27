@@ -4,9 +4,15 @@ from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, status, Depends, Query
 from fastapi_cache.decorator import cache
 
-from api.deps import get_current_admin_user
+from api.deps import get_current_admin
 from core.container import Container
-from schemas.hotel import HotelCreateRequest, HotelCreateResponse, HotelResponse, HotelParams
+from schemas.hotel import (
+    HotelCreateRequest,
+    HotelCreateResponse,
+    HotelResponse,
+    HotelParams,
+    HotelUpdate
+)
 from schemas.pagination import PaginationResponse
 from use_cases.hotel import IHotelUseCase
 
@@ -17,7 +23,7 @@ router = APIRouter(prefix="/hotels", tags=["hotels"])
     path="/",
     response_model=HotelCreateResponse,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(get_current_admin_user)],
+    dependencies=[Depends(get_current_admin)],
     responses={
         status.HTTP_403_FORBIDDEN: {"description": "Access denied"},
     }
@@ -60,3 +66,17 @@ async def get_hotels(
     return await hotel_use_case.get_hotels(
         params=params
     )
+
+
+@router.patch(
+    path="/{hotel_id}",
+    response_model=HotelUpdate,
+    dependencies=[Depends(get_current_admin)]
+)
+@inject
+async def update_hotel(
+        hotel_id: int,
+        schema: HotelUpdate,
+        hotel_use_case: IHotelUseCase = Depends(Provide[Container.hotel_use_case])
+):
+    return await hotel_use_case.update_hotel(hotel_id=hotel_id, schema=schema)

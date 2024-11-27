@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlalchemy import insert, select, func
+from sqlalchemy import insert, select, func, update
 from sqlalchemy.orm import selectinload, undefer
 
 from core.types import SortOrderType
@@ -58,3 +58,13 @@ class HotelRepository(Repository[Hotel]):
                 count=count,
                 items=hotels,
             )
+
+    async def update_hotel(self, hotel_id: int, values: dict[str, Any]) -> Hotel | None:
+        hotel_stmt = (
+            update(self.table).
+            filter_by(id=hotel_id).
+            values(**values).
+            returning(self.table)
+        )
+        async with self.session_factory() as session:
+            return await session.scalar(hotel_stmt)

@@ -23,3 +23,6 @@ class IHotelRepository(Protocol):
             **kwargs
     ) -> Result[Hotel]:
         ...
+
+    async def update_hotel(self, hotel_id: int, values: dict[str, Any]) -> Hotel | None:
+        ...
