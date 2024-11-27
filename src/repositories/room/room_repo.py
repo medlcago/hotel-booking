@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Any
 
-from sqlalchemy import insert, select, func, or_, and_
+from sqlalchemy import insert, select, func, or_, and_, update
 from sqlalchemy.exc import IntegrityError
 
 from models import Room, Booking
@@ -69,3 +69,13 @@ class RoomRepository(Repository[Room]):
                 count=count,
                 items=rooms,
             )
+
+    async def update_room(self, room_id: int, values: dict[str, Any]) -> Room | None:
+        room_stmt = (
+            update(self.table).
+            filter_by(id=room_id).
+            values(**values).
+            returning(self.table)
+        )
+        async with self.session_factory() as session:
+            return await session.scalar(room_stmt)

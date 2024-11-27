@@ -1,9 +1,15 @@
 from dataclasses import dataclass
 
-from core.exceptions import NotFoundException
+from core.exceptions import NotFoundException, BadRequestException
 from repositories.room import IRoomRepository
 from schemas.pagination import PaginationResponse
-from schemas.room import RoomCreateRequest, RoomResponse, RoomCreateResponse, RoomParams
+from schemas.room import (
+    RoomCreateRequest,
+    RoomResponse,
+    RoomCreateResponse,
+    RoomParams,
+    RoomUpdate
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -23,3 +29,12 @@ class RoomService:
     async def get_rooms(self, params: RoomParams) -> PaginationResponse[RoomResponse]:
         result = await self.room_repository.get_rooms(**params.model_dump(exclude_none=True))
         return PaginationResponse[RoomResponse].model_validate(result, from_attributes=True)
+
+    async def update_room(self, room_id: int, schema: RoomUpdate) -> RoomUpdate:
+        room = await self.room_repository.update_room(
+            room_id=room_id,
+            values=schema.model_dump(exclude_unset=True)
+        )
+        if not room:
+            raise BadRequestException
+        return RoomUpdate.model_validate(room, from_attributes=True)

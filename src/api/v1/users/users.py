@@ -3,7 +3,7 @@ from typing import Annotated
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, status, Depends, Query
 
-from api.deps import CurrentUser, get_current_admin_user
+from api.deps import CurrentUser, get_current_admin
 from core.container import Container
 from schemas.pagination import PaginationResponse
 from schemas.user import UserResponse, UserParams
@@ -32,7 +32,7 @@ async def get_me(user: CurrentUser):
 @router.get(
     path="/",
     response_model=PaginationResponse[UserResponse],
-    dependencies=[Depends(get_current_admin_user)]
+    dependencies=[Depends(get_current_admin)]
 )
 @inject
 async def get_users(

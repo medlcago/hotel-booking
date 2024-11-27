@@ -1,6 +1,12 @@
 from dataclasses import dataclass
 
-from schemas.hotel import HotelCreateRequest, HotelResponse, HotelCreateResponse, HotelParams
+from schemas.hotel import (
+    HotelCreateRequest,
+    HotelResponse,
+    HotelCreateResponse,
+    HotelParams,
+    HotelUpdate
+)
 from schemas.pagination import PaginationResponse
 from services.hotel import IHotelService
 
@@ -20,3 +26,7 @@ class HotelUseCase:
     async def get_hotels(self, params: HotelParams) -> PaginationResponse[HotelResponse]:
         hotels = await self.hotel_service.get_hotels(params=params)
         return hotels
+
+    async def update_hotel(self, hotel_id: int, schema: HotelUpdate) -> HotelUpdate:
+        hotel = await self.hotel_service.update_hotel(hotel_id=hotel_id, schema=schema)
+        return hotel

@@ -1,7 +1,13 @@
 from dataclasses import dataclass
 
 from schemas.pagination import PaginationResponse
-from schemas.room import RoomCreateRequest, RoomResponse, RoomCreateResponse, RoomParams
+from schemas.room import (
+    RoomCreateRequest,
+    RoomResponse,
+    RoomCreateResponse,
+    RoomParams,
+    RoomUpdate
+)
 from services.room import IRoomService
 
 
@@ -21,5 +27,6 @@ class RoomUseCase:
         rooms = await self.room_service.get_rooms(params=params)
         return rooms
 
-    async def book_room(self, room_id: int, hotel_id: int) -> RoomResponse:
-        pass
+    async def update_room(self, room_id: int, schema: RoomUpdate) -> RoomUpdate:
+        room = await self.room_service.update_room(room_id=room_id, schema=schema)
+        return room

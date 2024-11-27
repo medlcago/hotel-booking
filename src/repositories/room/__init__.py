@@ -22,3 +22,6 @@ class IRoomRepository(Protocol):
             **kwargs
     ) -> Result[Room]:
         ...
+
+    async def update_room(self, room_id: int, values: dict[str, Any]) -> Room | None:
+        ...

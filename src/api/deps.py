@@ -27,7 +27,7 @@ async def get_current_user(
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-async def get_current_admin_user(user: CurrentUser) -> User:
+async def get_current_admin(user: CurrentUser) -> User:
     if not user.is_admin:
         raise ForbiddenException
     return user
