@@ -9,6 +9,5 @@ An example of environment variables can be found in .env.example file
 ## Running with Docker Compose
 - Start the service using Docker Compose:
 ```bash
-    docker-compose up -d
+docker-compose up -d
 ```
-

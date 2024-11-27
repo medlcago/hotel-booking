@@ -15,7 +15,12 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post(
     path="/sign-up",
     response_model=Token,
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_409_CONFLICT: {
+            "description": "User already exists",
+        }
+    }
 )
 @inject
 async def sign_up(
@@ -25,7 +30,15 @@ async def sign_up(
     return await auth_use_case.register(schema=schema)
 
 
-@router.post(path="/sign-in", response_model=Token)
+@router.post(
+    path="/sign-in",
+    response_model=Token,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Invalid credentials",
+        }
+    }
+)
 @inject
 async def sign_in(
         schema: SignInRequest,
@@ -34,7 +47,15 @@ async def sign_in(
     return await auth_use_case.login(schema=schema)
 
 
-@router.post("/refresh-token", response_model=Token)
+@router.post(
+    path="/refresh-token",
+    response_model=Token,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Invalid token",
+        }
+    }
+)
 @inject
 async def refresh_token(
         schema: RefreshToken,

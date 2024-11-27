@@ -22,6 +22,9 @@ router = APIRouter(prefix="/reviews", tags=["reviews"])
         status.HTTP_400_BAD_REQUEST: {
             "description": "Bad request",
         },
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Not authenticated",
+        },
         status.HTTP_403_FORBIDDEN: {
             "description": "Not authenticated",
         }
@@ -36,7 +39,10 @@ async def add_review(
     return await review_use_case.add_review(schema=schema, user_id=user.id)
 
 
-@router.get(path="/", response_model=PaginationResponse[ReviewResponse])
+@router.get(
+    path="/",
+    response_model=PaginationResponse[ReviewResponse]
+)
 @cache(expire=120)
 @inject
 async def get_reviews(
@@ -51,8 +57,8 @@ async def get_reviews(
     path="/{review_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
-        status.HTTP_400_BAD_REQUEST: {
-            "description": "Bad request",
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Forbidden",
         }
     }
 )

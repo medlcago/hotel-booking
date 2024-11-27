@@ -32,7 +32,12 @@ async def get_me(user: CurrentUser):
 @router.get(
     path="/",
     response_model=PaginationResponse[UserResponse],
-    dependencies=[Depends(get_current_admin)]
+    dependencies=[Depends(get_current_admin)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Forbidden",
+        }
+    }
 )
 @inject
 async def get_users(

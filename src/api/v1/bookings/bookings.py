@@ -13,7 +13,16 @@ from use_cases.booking import IBookingUseCase
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
 
-@router.post("/", response_model=BookingCreateResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    path="/",
+    response_model=BookingCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Bad request",
+        }
+    }
+)
 @inject
 async def create_booking(
         user: CurrentUser,
@@ -23,7 +32,18 @@ async def create_booking(
     return await booking_use_case.create_booking(schema=schema, user_id=user.id)
 
 
-@router.post("/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.post(
+    path="/{booking_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Bad request",
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Forbidden",
+        }
+    }
+)
 @inject
 async def cancel_booking(
         user: CurrentUser,
@@ -33,7 +53,15 @@ async def cancel_booking(
     await booking_use_case.cancel_booking(booking_id=booking_id, user_id=user.id)
 
 
-@router.get("/{booking_id}", response_model=BookingResponse)
+@router.get(
+    path="/{booking_id}",
+    response_model=BookingResponse,
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Forbidden",
+        }
+    }
+)
 @cache(expire=300)
 @inject
 async def get_booking(
@@ -44,7 +72,10 @@ async def get_booking(
     return await booking_use_case.get_booking(booking_id=booking_id, user_id=user.id)
 
 
-@router.get("/", response_model=PaginationResponse[BookingResponse])
+@router.get(
+    path="/",
+    response_model=PaginationResponse[BookingResponse]
+)
 @cache(expire=300)
 @inject
 async def get_bookings(

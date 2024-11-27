@@ -25,7 +25,9 @@ router = APIRouter(prefix="/hotels", tags=["hotels"])
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(get_current_admin)],
     responses={
-        status.HTTP_403_FORBIDDEN: {"description": "Access denied"},
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Forbidden"
+        },
     }
 )
 @inject
@@ -40,7 +42,9 @@ async def add_hotel(
     path="/{hotel_id}",
     response_model=HotelResponse,
     responses={
-        status.HTTP_404_NOT_FOUND: {"description": "Hotel not found"}
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Hotel not found"
+        },
     }
 )
 @cache(expire=60)
@@ -71,7 +75,12 @@ async def get_hotels(
 @router.patch(
     path="/{hotel_id}",
     response_model=HotelUpdate,
-    dependencies=[Depends(get_current_admin)]
+    dependencies=[Depends(get_current_admin)],
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Bad request"
+        }
+    }
 )
 @inject
 async def update_hotel(

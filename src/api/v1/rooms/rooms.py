@@ -25,7 +25,9 @@ router = APIRouter(prefix="/rooms", tags=["rooms"])
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(get_current_admin)],
     responses={
-        status.HTTP_403_FORBIDDEN: {"description": "Access denied"},
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Forbidden"
+        },
     }
 )
 @inject
@@ -40,7 +42,9 @@ async def add_room(
     path="/{room_id}",
     response_model=RoomResponse,
     responses={
-        status.HTTP_404_NOT_FOUND: {"description": "Room not found"}
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Room not found"
+        },
     }
 )
 @cache(expire=60)
@@ -70,6 +74,11 @@ async def get_rooms(
     path="/{room_id}",
     response_model=RoomUpdate,
     dependencies=[Depends(get_current_admin)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Forbidden"
+        }
+    }
 )
 @inject
 async def update_room(
