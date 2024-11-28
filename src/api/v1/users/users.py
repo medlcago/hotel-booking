@@ -3,7 +3,7 @@ from typing import Annotated
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, status, Depends, Query
 
-from api.deps import CurrentUser, get_current_admin
+from api.deps import CurrentActiveUser, get_current_admin
 from core.container import Container
 from schemas.pagination import PaginationResponse
 from schemas.user import UserResponse, UserParams
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/users", tags=["users"])
     }
 )
 @inject
-async def get_me(user: CurrentUser):
+async def get_me(user: CurrentActiveUser):
     return user
 
 

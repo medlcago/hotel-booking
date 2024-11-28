@@ -22,7 +22,7 @@ class APIServer:
     @asynccontextmanager
     async def lifespan(self, _: FastAPI) -> AsyncIterator[None]:
         await init_cache(
-            redis_url=settings.redis.url if settings.redis and not settings.debug else None,
+            redis_url=settings.redis.url,
             prefix="fastapi-cache",
             expire=60,
         )

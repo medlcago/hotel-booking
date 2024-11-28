@@ -48,7 +48,7 @@ class Redis(BaseModel):
 class Settings(BaseSettings):
     secret_key: SecretStr
     db: Database
-    redis: Redis | None = None
+    redis: Redis
 
     debug: bool
     access_token_lifetime: timedelta = timedelta(minutes=30)

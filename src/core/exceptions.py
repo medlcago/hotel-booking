@@ -3,6 +3,7 @@ from http import HTTPStatus
 from fastapi import FastAPI
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class APIException(Exception):
@@ -33,8 +34,18 @@ async def api_exception_handler(request: Request, exc: APIException) -> JSONResp
     )
 
 
+async def db_exception_handler(request: Request, exc: SQLAlchemyError) -> JSONResponse:  # noqa
+    return JSONResponse(
+        status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
+        content={
+            "message": "Oops! Something went wrong!",
+        }
+    )
+
+
 def init_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(APIException, api_exception_handler)  # noqa
+    app.add_exception_handler(SQLAlchemyError, db_exception_handler)  # noqa
 
 
 class BadRequestException(APIException):
@@ -49,7 +60,7 @@ class UnauthorizedException(APIException):
     description = HTTPStatus.UNAUTHORIZED.description
 
 
-class AlreadyExistsException(APIException):
+class ConflictException(APIException):
     status_code = HTTPStatus.CONFLICT.value
     message = HTTPStatus.CONFLICT.phrase
     description = HTTPStatus.CONFLICT.description
@@ -65,3 +76,47 @@ class ForbiddenException(APIException):
     status_code = HTTPStatus.FORBIDDEN.value
     message = HTTPStatus.FORBIDDEN.phrase
     description = HTTPStatus.FORBIDDEN.description
+
+
+class BadCredentials(UnauthorizedException):
+    description = "Invalid email or password."
+
+
+class UserNotVerified(UnauthorizedException):
+    description = "Your account has not been verified. Please check your email."
+
+
+class UserInactive(ForbiddenException):
+    description = "Your account has been disabled. Please contact support."
+
+
+class UserAlreadyExists(ConflictException):
+    description = "User already exists."
+
+
+class RoomNotFound(NotFoundException):
+    description = "Room not found."
+
+
+class RoomAlreadyBooked(BadRequestException):
+    description = "Room already booked."
+
+
+class BookingNotFound(NotFoundException):
+    description = "Booking not found."
+
+
+class BookingCancelNotAllowed(ForbiddenException):
+    description = "Cancel booking is not allowed."
+
+
+class HotelNotFound(NotFoundException):
+    description = "Hotel not found."
+
+
+class ReviewAlreadyExists(ConflictException):
+    description = "A review has already been submitted."
+
+
+class ReviewDeleteNotAllowed(ForbiddenException):
+    description = "You have not allowed to delete this review."

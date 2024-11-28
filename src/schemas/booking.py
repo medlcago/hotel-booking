@@ -40,3 +40,7 @@ class BookingCreateResponse(BaseModel):
 
 class BookingResponse(BookingCreateResponse):
     pass
+
+
+class BookingCancelRequest(BaseModel):
+    booking_id: PositiveInt

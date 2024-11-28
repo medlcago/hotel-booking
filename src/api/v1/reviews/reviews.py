@@ -4,7 +4,7 @@ from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, status, Depends, Query
 from fastapi_cache.decorator import cache
 
-from api.deps import CurrentUser
+from api.deps import CurrentActiveUser
 from core.container import Container
 from schemas.pagination import PaginationResponse
 from schemas.review import ReviewCreateRequest, ReviewCreateResponse, ReviewResponse, ReviewParams
@@ -33,7 +33,7 @@ router = APIRouter(prefix="/reviews", tags=["reviews"])
 @inject
 async def add_review(
         schema: ReviewCreateRequest,
-        user: CurrentUser,
+        user: CurrentActiveUser,
         review_use_case: IReviewUseCase = Depends(Provide[Container.review_use_case])
 ):
     return await review_use_case.add_review(schema=schema, user_id=user.id)
@@ -65,7 +65,7 @@ async def get_reviews(
 @inject
 async def delete_review(
         review_id: int,
-        user: CurrentUser,
+        user: CurrentActiveUser,
         review_use_case: IReviewUseCase = Depends(Provide[Container.review_use_case])
 ):
     await review_use_case.delete_review(review_id=review_id, user_id=user.id)

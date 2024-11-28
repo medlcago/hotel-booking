@@ -4,9 +4,15 @@ from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, status, Depends, Query
 from fastapi_cache.decorator import cache
 
-from api.deps import CurrentUser
+from api.deps import CurrentActiveUser
 from core.container import Container
-from schemas.booking import BookingCreateRequest, BookingCreateResponse, BookingResponse, BookingParams
+from schemas.booking import (
+    BookingCreateRequest,
+    BookingCreateResponse,
+    BookingResponse,
+    BookingParams,
+    BookingCancelRequest
+)
 from schemas.pagination import PaginationResponse
 from use_cases.booking import IBookingUseCase
 
@@ -25,7 +31,7 @@ router = APIRouter(prefix="/bookings", tags=["bookings"])
 )
 @inject
 async def create_booking(
-        user: CurrentUser,
+        user: CurrentActiveUser,
         schema: BookingCreateRequest,
         booking_use_case: IBookingUseCase = Depends(Provide[Container.booking_use_case])
 ):
@@ -33,7 +39,7 @@ async def create_booking(
 
 
 @router.post(
-    path="/{booking_id}",
+    path="/cancel",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_400_BAD_REQUEST: {
@@ -46,11 +52,11 @@ async def create_booking(
 )
 @inject
 async def cancel_booking(
-        user: CurrentUser,
-        booking_id: int,
+        user: CurrentActiveUser,
+        schema: BookingCancelRequest,
         booking_use_case: IBookingUseCase = Depends(Provide[Container.booking_use_case])
 ):
-    await booking_use_case.cancel_booking(booking_id=booking_id, user_id=user.id)
+    await booking_use_case.cancel_booking(schema=schema, user_id=user.id)
 
 
 @router.get(
@@ -65,7 +71,7 @@ async def cancel_booking(
 @cache(expire=300)
 @inject
 async def get_booking(
-        user: CurrentUser,
+        user: CurrentActiveUser,
         booking_id: int,
         booking_use_case: IBookingUseCase = Depends(Provide[Container.booking_use_case])
 ):
@@ -79,7 +85,7 @@ async def get_booking(
 @cache(expire=300)
 @inject
 async def get_bookings(
-        user: CurrentUser,
+        user: CurrentActiveUser,
         params: Annotated[BookingParams, Query()],
         booking_use_case: IBookingUseCase = Depends(Provide[Container.booking_use_case])
 ):

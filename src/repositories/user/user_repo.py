@@ -11,7 +11,11 @@ class UserRepository(Repository[User]):
     table = User
 
     async def create_user(self, values: dict[str, Any]) -> User:
-        user_stmt = insert(self.table).values(**values).returning(self.table)
+        user_stmt = (
+            insert(self.table).
+            values(**values).
+            returning(self.table)
+        )
         try:
             async with self.session_factory() as session:
                 return await session.scalar(user_stmt)
@@ -19,12 +23,18 @@ class UserRepository(Repository[User]):
             raise AlreadyExistsError
 
     async def get_user_by_id(self, user_id: int) -> User | None:
-        user_stmt = select(self.table).filter_by(id=user_id)
+        user_stmt = (
+            select(self.table).
+            filter_by(id=user_id)
+        )
         async with self.session_factory() as session:
             return await session.scalar(user_stmt)
 
     async def get_user_by_email(self, email: str) -> User | None:
-        user_stmt = select(self.table).filter_by(email=email)
+        user_stmt = (
+            select(self.table).
+            filter_by(email=email)
+        )
         async with self.session_factory() as session:
             return await session.scalar(user_stmt)
 
@@ -35,7 +45,10 @@ class UserRepository(Repository[User]):
             offset(offset).
             filter_by(**kwargs)
         )
-        count_stmt = select(func.count(self.table.id)).filter_by(**kwargs)
+        count_stmt = (
+            select(func.count(self.table.id)).
+            filter_by(**kwargs)
+        )
 
         async with self.session_factory() as session:
             users = (await session.scalars(users_stmt)).all()

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from core.exceptions import NotFoundException, BadRequestException
+from core.exceptions import HotelNotFound
 from repositories.hotel import IHotelRepository
 from schemas.hotel import (
     HotelCreateRequest,
@@ -23,7 +23,7 @@ class HotelService:
     async def get_hotel_by_id(self, hotel_id: int) -> HotelResponse:
         hotel = await self.hotel_repository.get_hotel_by_id(hotel_id)
         if not hotel:
-            raise NotFoundException
+            raise HotelNotFound
         return HotelResponse.model_validate(hotel, from_attributes=True)
 
     async def get_hotels(self, params: HotelParams) -> PaginationResponse[HotelResponse]:
@@ -36,5 +36,5 @@ class HotelService:
             values=schema.model_dump(exclude_unset=True)
         )
         if not hotel:
-            raise BadRequestException
+            raise HotelNotFound
         return HotelUpdate.model_validate(hotel, from_attributes=True)

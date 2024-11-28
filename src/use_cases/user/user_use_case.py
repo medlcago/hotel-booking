@@ -10,5 +10,4 @@ class UserUseCase:
     user_service: IUserService
 
     async def get_users(self, params: UserParams) -> PaginationResponse[UserResponse]:
-        users = await self.user_service.get_users(params=params)
-        return users
+        return await self.user_service.get_users(params=params)

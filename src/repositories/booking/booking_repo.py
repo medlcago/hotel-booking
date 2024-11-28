@@ -11,14 +11,22 @@ class BookingRepository(Repository[Booking]):
     table = Booking
 
     async def create_booking(self, values: dict[str, Any]) -> Booking:
-        booking_stmt = insert(self.table).values(**values).returning(self.table)
+        booking_stmt = (
+            insert(self.table).
+            values(**values).
+            returning(self.table)
+        )
         async with self.session_factory() as session:
             return await session.scalar(booking_stmt)
 
-    async def cancel_booking(self, booking_id: int) -> None:
-        booking_stmt = update(self.table).filter_by(id=booking_id).values(status=False)
+    async def update_booking(self, booking_id: int, values: dict[str, Any]) -> Booking | None:
+        booking_stmt = (
+            update(self.table).
+            filter_by(id=booking_id).
+            values(**values)
+        )
         async with self.session_factory() as session:
-            await session.execute(booking_stmt)
+            return await session.scalar(booking_stmt)
 
     async def get_user_bookings(
             self,
@@ -33,7 +41,10 @@ class BookingRepository(Repository[Booking]):
             limit(limit=limit).
             offset(offset)
         )
-        count_stmt = select(func.count(self.table.id)).filter_by(**kwargs)
+        count_stmt = (
+            select(func.count(self.table.id)).
+            filter_by(user_id=user_id, **kwargs)
+        )
 
         async with self.session_factory() as session:
             bookings = (await session.scalars(bookings_stmt)).all()
@@ -65,6 +76,9 @@ class BookingRepository(Repository[Booking]):
             return await session.scalar(booking_stmt)
 
     async def get_user_booking(self, booking_id: int, user_id: int) -> Booking | None:
-        booking_stmt = select(self.table).filter_by(id=booking_id, user_id=user_id)
+        booking_stmt = (
+            select(self.table).
+            filter_by(id=booking_id, user_id=user_id)
+        )
         async with self.session_factory() as session:
             return await session.scalar(booking_stmt)

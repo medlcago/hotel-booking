@@ -4,10 +4,7 @@ from schemas.auth import (
     SignInRequest,
     SignUpRequest
 )
-from schemas.token import (
-    Token,
-    RefreshToken
-)
+from schemas.token import Token
 from .auth_service import AuthService
 
 
@@ -22,5 +19,5 @@ class IAuthService(Protocol):
     def get_token(user_id: int) -> Token:
         ...
 
-    async def refresh_token(self, schema: RefreshToken) -> Token:
+    async def refresh_token(self, user_id: int) -> Token:
         ...

@@ -1,13 +1,15 @@
 from dataclasses import dataclass
 
 from core import security
-from core.exceptions import AlreadyExistsException
-from core.exceptions import UnauthorizedException
-from enums.token import TokenType
+from core.exceptions import (
+    UserAlreadyExists,
+    BadCredentials,
+    UserNotVerified,
+    UserInactive
+)
 from repositories.user import IUserRepository
 from schemas.auth import SignInRequest
 from schemas.auth import SignUpRequest
-from schemas.token import RefreshToken
 from schemas.token import Token
 
 
@@ -18,7 +20,7 @@ class AuthService:
     async def sign_up(self, schema: SignUpRequest) -> Token:
         user = await self.user_repository.get_user_by_email(email=schema.email)
         if user:
-            raise AlreadyExistsException
+            raise UserAlreadyExists
 
         schema.password = security.hash_password(schema.password)
         user = await self.user_repository.create_user(values=schema.model_dump())
@@ -29,9 +31,13 @@ class AuthService:
     async def sign_in(self, schema: SignInRequest) -> Token:
         user = await self.user_repository.get_user_by_email(email=schema.email)
         if not user:
-            raise UnauthorizedException
+            raise BadCredentials
         if not security.verify_password(password=schema.password, hashed_password=user.password):
-            raise UnauthorizedException
+            raise BadCredentials
+        if not user.is_active:
+            raise UserInactive
+        if not user.is_verified:
+            raise UserNotVerified
         return self.get_token(
             user_id=user.id
         )
@@ -45,11 +51,5 @@ class AuthService:
             refresh_token=refresh_token
         )
 
-    async def refresh_token(self, schema: RefreshToken) -> Token:
-        user_id = security.get_identity(
-            token=schema.refresh_token,
-            token_type=TokenType.refresh
-        )
-        if not user_id:
-            raise UnauthorizedException
+    async def refresh_token(self, user_id: int) -> Token:
         return self.get_token(user_id=user_id)

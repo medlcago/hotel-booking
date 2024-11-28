@@ -10,7 +10,7 @@ class IBookingRepository(Protocol):
     async def create_booking(self, values: dict[str, Any]) -> Booking:
         ...
 
-    async def cancel_booking(self, booking_id: int) -> None:
+    async def update_booking(self, booking_id: int, values: dict[str, Any]) -> Booking | None:
         ...
 
     async def get_user_bookings(
