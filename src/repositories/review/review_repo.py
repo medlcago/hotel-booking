@@ -12,7 +12,11 @@ class ReviewRepository(Repository[Review]):
     table = Review
 
     async def add_review(self, values: dict[str, Any]) -> Review:
-        review_stmt = insert(self.table).values(**values).returning(self.table)
+        review_stmt = (
+            insert(self.table).
+            values(**values).
+            returning(self.table)
+        )
         try:
             async with self.session_factory() as session:
                 return await session.scalar(review_stmt)
@@ -37,7 +41,10 @@ class ReviewRepository(Repository[Review]):
             reviews_stmt = reviews_stmt.order_by(
                 column.desc() if sort_order == "desc" else column.asc()  # noqa
             )
-        count_stmt = select(func.count(self.table.id)).filter_by(**kwargs)
+        count_stmt = (
+            select(func.count(self.table.id)).
+            filter_by(**kwargs)
+        )
 
         async with self.session_factory() as session:
             reviews = (await session.scalars(reviews_stmt)).all()
@@ -48,11 +55,17 @@ class ReviewRepository(Repository[Review]):
             )
 
     async def get_user_review(self, review_id: int, user_id: int) -> Review | None:
-        review_stmt = select(self.table).filter_by(id=review_id, user_id=user_id)
+        review_stmt = (
+            select(self.table).
+            filter_by(id=review_id, user_id=user_id)
+        )
         async with self.session_factory() as session:
             return await session.scalar(review_stmt)
 
     async def delete_review(self, review_id: int, user_id: int) -> None:
-        review_stmt = delete(self.table).filter_by(id=review_id, user_id=user_id)
+        review_stmt = (
+            delete(self.table).
+            filter_by(id=review_id, user_id=user_id)
+        )
         async with self.session_factory() as session:
             await session.execute(review_stmt)

@@ -6,7 +6,13 @@ from fastapi_cache.decorator import cache
 
 from api.deps import CurrentUser
 from core.container import Container
-from schemas.booking import BookingCreateRequest, BookingCreateResponse, BookingResponse, BookingParams
+from schemas.booking import (
+    BookingCreateRequest,
+    BookingCreateResponse,
+    BookingResponse,
+    BookingParams,
+    BookingCancelRequest
+)
 from schemas.pagination import PaginationResponse
 from use_cases.booking import IBookingUseCase
 
@@ -33,7 +39,7 @@ async def create_booking(
 
 
 @router.post(
-    path="/{booking_id}",
+    path="/cancel",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_400_BAD_REQUEST: {
@@ -47,10 +53,10 @@ async def create_booking(
 @inject
 async def cancel_booking(
         user: CurrentUser,
-        booking_id: int,
+        schema: BookingCancelRequest,
         booking_use_case: IBookingUseCase = Depends(Provide[Container.booking_use_case])
 ):
-    await booking_use_case.cancel_booking(booking_id=booking_id, user_id=user.id)
+    await booking_use_case.cancel_booking(schema=schema, user_id=user.id)
 
 
 @router.get(

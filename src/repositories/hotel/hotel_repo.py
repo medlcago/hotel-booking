@@ -12,7 +12,11 @@ class HotelRepository(Repository[Hotel]):
     table = Hotel
 
     async def add_hotel(self, values: dict[str, Any]) -> Hotel:
-        hotel_stmt = insert(self.table).values(**values).returning(self.table)
+        hotel_stmt = (
+            insert(self.table).
+            values(**values).
+            returning(self.table)
+        )
         async with self.session_factory() as session:
             hotel = await session.scalar(hotel_stmt)
             return hotel
@@ -46,7 +50,10 @@ class HotelRepository(Repository[Hotel]):
             hotels_stmt = hotels_stmt.order_by(
                 column.desc() if sort_order == "desc" else column.asc()  # noqa
             )
-        count_stmt = select(func.count(self.table.id)).filter_by(**kwargs)
+        count_stmt = (
+            select(func.count(self.table.id)).
+            filter_by(**kwargs)
+        )
         if location:
             hotels_stmt = hotels_stmt.filter(self.table.location.ilike(f"%{location}%"))
             count_stmt = count_stmt.filter(self.table.location.ilike(f"%{location}%"))

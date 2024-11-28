@@ -3,6 +3,7 @@ from http import HTTPStatus
 from fastapi import FastAPI
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class APIException(Exception):
@@ -33,8 +34,18 @@ async def api_exception_handler(request: Request, exc: APIException) -> JSONResp
     )
 
 
+async def db_exception_handler(request: Request, exc: SQLAlchemyError) -> JSONResponse:  # noqa
+    return JSONResponse(
+        status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
+        content={
+            "message": "Oops! Something went wrong!",
+        }
+    )
+
+
 def init_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(APIException, api_exception_handler)  # noqa
+    app.add_exception_handler(SQLAlchemyError, db_exception_handler)  # noqa
 
 
 class BadRequestException(APIException):

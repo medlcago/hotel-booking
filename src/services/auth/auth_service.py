@@ -3,11 +3,9 @@ from dataclasses import dataclass
 from core import security
 from core.exceptions import AlreadyExistsException
 from core.exceptions import UnauthorizedException
-from enums.token import TokenType
 from repositories.user import IUserRepository
 from schemas.auth import SignInRequest
 from schemas.auth import SignUpRequest
-from schemas.token import RefreshToken
 from schemas.token import Token
 
 
@@ -45,11 +43,5 @@ class AuthService:
             refresh_token=refresh_token
         )
 
-    async def refresh_token(self, schema: RefreshToken) -> Token:
-        user_id = security.get_identity(
-            token=schema.refresh_token,
-            token_type=TokenType.refresh
-        )
-        if not user_id:
-            raise UnauthorizedException
+    async def refresh_token(self, user_id: int) -> Token:
         return self.get_token(user_id=user_id)

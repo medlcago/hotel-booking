@@ -12,7 +12,11 @@ class RoomRepository(Repository[Room]):
     table = Room
 
     async def add_room(self, values: dict[str, Any]) -> Room:
-        room_stmt = insert(self.table).values(**values).returning(self.table)
+        room_stmt = (
+            insert(self.table).
+            values(**values).
+            returning(self.table)
+        )
         try:
             async with self.session_factory() as session:
                 return await session.scalar(room_stmt)
@@ -20,7 +24,10 @@ class RoomRepository(Repository[Room]):
             raise AlreadyExistsError
 
     async def get_room_by_id(self, room_id: int) -> Room | None:
-        room_stmt = select(self.table).filter_by(id=room_id)
+        room_stmt = (
+            select(self.table).
+            filter_by(id=room_id)
+        )
         async with self.session_factory() as session:
             return await session.scalar(room_stmt)
 

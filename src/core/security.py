@@ -4,7 +4,7 @@ from typing import Any
 import bcrypt
 import jwt
 from fastapi.requests import Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
 from pydantic import SecretStr
 
 from core.exceptions import UnauthorizedException
@@ -42,7 +42,7 @@ def verify_password(password: str, hashed_password: str) -> bool:
 def create_token(
         identity: int,
         token_type: TokenType,
-        claims: dict[str, Any] = None,
+        claims: dict[str, Any] | None = None,
         lifetime: timedelta = DEFAULT_TOKEN_LIFETIME
 ) -> str:
     payload = dict(
@@ -62,7 +62,7 @@ def create_token(
     return token
 
 
-def create_access_token(identity: int, claims: dict[str, Any] = None) -> str:
+def create_access_token(identity: int, claims: dict[str, Any] | None = None) -> str:
     return create_token(
         identity=identity,
         token_type=TokenType.access,
@@ -71,7 +71,7 @@ def create_access_token(identity: int, claims: dict[str, Any] = None) -> str:
     )
 
 
-def create_refresh_token(identity: int, claims: dict[str, Any] = None) -> str:
+def create_refresh_token(identity: int, claims: dict[str, Any] | None = None) -> str:
     return create_token(
         identity=identity,
         token_type=TokenType.refresh,
@@ -92,25 +92,35 @@ def decode_token(token: str) -> dict[str, Any]:
         return {}
 
 
-def get_identity(token: str, token_type: TokenType | None = None) -> int | None:
-    payload = decode_token(token=token)
-    if not (payload and payload.get("identity")):
-        return
-    if token_type and payload.get("token_type") != token_type:
-        return
-    return payload.get("identity")
-
-
-class JWTBearer(HTTPBearer):
-    def __init__(self, auto_error: bool = True, token_type: TokenType = TokenType.access):
-        super().__init__(auto_error=auto_error)
-        self.token_type = token_type
-
+class TokenBearer(HTTPBearer):
     async def __call__(self, request: Request) -> int:
-        credentials: HTTPAuthorizationCredentials = await super().__call__(request)
+        credentials = await super().__call__(request)
         if not credentials:
-            raise UnauthorizedException
-        identity = get_identity(token=credentials.credentials, token_type=self.token_type)
-        if not identity:
-            raise UnauthorizedException
-        return identity
+            raise UnauthorizedException("Invalid credentials")
+        token_data = decode_token(token=credentials.credentials)
+        if not token_data:
+            raise UnauthorizedException("Invalid token")
+        self.verify_token_data(token_data)
+        return self.get_user_id(token_data=token_data)
+
+    def verify_token_data(self, token_data: dict[str, Any]) -> None:
+        raise NotImplementedError
+
+    @staticmethod
+    def get_user_id(token_data: dict[str, Any]) -> int:
+        user_id = token_data.get("identity")
+        if not user_id:
+            raise UnauthorizedException("Invalid token")
+        return user_id
+
+
+class AccessTokenBearer(TokenBearer):
+    def verify_token_data(self, token_data: dict[str, Any]) -> None:
+        if token_data.get("token_type") != TokenType.access:
+            raise UnauthorizedException("Invalid token type")
+
+
+class RefreshTokenBearer(TokenBearer):
+    def verify_token_data(self, token_data: dict[str, Any]) -> None:
+        if token_data.get("token_type") != TokenType.refresh:
+            raise UnauthorizedException("Invalid token type")
