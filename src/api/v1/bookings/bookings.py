@@ -4,7 +4,7 @@ from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, status, Depends, Query
 from fastapi_cache.decorator import cache
 
-from api.deps import CurrentActiveUser
+from api.deps import CurrentActiveUser, CurrentVerifiedUser
 from core.container import Container
 from schemas.booking import (
     BookingCreateRequest,
@@ -26,12 +26,15 @@ router = APIRouter(prefix="/bookings", tags=["bookings"])
     responses={
         status.HTTP_400_BAD_REQUEST: {
             "description": "Bad request",
+        },
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Unauthorized",
         }
     }
 )
 @inject
 async def create_booking(
-        user: CurrentActiveUser,
+        user: CurrentVerifiedUser,
         schema: BookingCreateRequest,
         booking_use_case: IBookingUseCase = Depends(Provide[Container.booking_use_case])
 ):

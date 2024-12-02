@@ -7,7 +7,8 @@ from core.container import Container
 from core.exceptions import (
     UnauthorizedException,
     ForbiddenException,
-    UserInactive
+    UserInactive,
+    UserNotVerified
 )
 from core.security import AccessTokenBearer, RefreshTokenBearer
 from schemas.user import UserResponse
@@ -40,7 +41,19 @@ async def get_current_active_user(user: CurrentUser) -> UserResponse:
 CurrentActiveUser = Annotated[UserResponse, Depends(get_current_active_user)]
 
 
+async def get_current_verified_user(user: CurrentActiveUser) -> UserResponse:
+    if not user.is_verified:
+        raise UserNotVerified
+    return user
+
+
+CurrentVerifiedUser = Annotated[UserResponse, Depends(get_current_verified_user)]
+
+
 async def get_current_admin(user: CurrentUser) -> UserResponse:
     if not user.is_admin:
         raise ForbiddenException
     return user
+
+
+CurrentAdmin = Annotated[UserResponse, Depends(get_current_admin)]
