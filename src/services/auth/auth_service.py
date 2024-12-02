@@ -4,7 +4,6 @@ from core import security
 from core.exceptions import (
     UserAlreadyExists,
     BadCredentials,
-    UserNotVerified,
     UserInactive,
     LinkExpired,
 )
@@ -38,8 +37,6 @@ class AuthService:
             raise BadCredentials
         if not user.is_active:
             raise UserInactive
-        if not user.is_verified:
-            raise UserNotVerified
         return self.get_token(
             user_id=user.id
         )
