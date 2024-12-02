@@ -16,6 +16,8 @@ services:
     command: ./scripts/app.sh
     depends_on:
       - database
+      - redis
+    restart: always
 
   database:
     container_name: postgres
@@ -76,3 +78,28 @@ services:
       - "6380:6379"
     volumes:
       - redis_data:/data
+
+  celery_worker:
+    container_name: celery_worker
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./scripts/celery_worker.sh
+    depends_on:
+      - hotel_booking
+      - redis
+    restart: always
+
+  flower:
+    container_name: flower
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./scripts/flower.sh
+    ports:
+      - 5557:5555
+    depends_on:
+      - hotel_booking
+      - redis
+      - celery_worker
+    restart: always

@@ -17,3 +17,6 @@ class IUserRepository(Protocol):
 
     async def get_users(self, limit: int, offset: int, **kwargs) -> Result[User]:
         ...
+
+    async def update_user(self, user_id: int, values: dict[str, Any]) -> User | None:
+        ...

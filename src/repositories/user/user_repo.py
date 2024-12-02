@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlalchemy import insert, select, func
+from sqlalchemy import insert, select, func, update
 from sqlalchemy.exc import IntegrityError
 
 from models import User
@@ -57,3 +57,13 @@ class UserRepository(Repository[User]):
                 count=count,
                 items=users
             )
+
+    async def update_user(self, user_id: int, values: dict[str, Any]) -> User | None:
+        user_stmt = (
+            update(self.table).
+            filter_by(id=user_id).
+            values(**values).
+            returning(self.table)
+        )
+        async with self.session_factory() as session:
+            return await session.scalar(user_stmt)

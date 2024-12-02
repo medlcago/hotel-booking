@@ -45,11 +45,26 @@ class Redis(BaseModel):
     url: str
 
 
+class SmtpServer(BaseModel):
+    username: str
+    password: str
+    host: str
+    port: int
+
+
+class Celery(BaseModel):
+    broker_url: str
+    backend_url: str
+
+
 class Settings(BaseSettings):
     secret_key: SecretStr
     db: Database
     redis: Redis
+    smtp_server: SmtpServer
+    celery: Celery
 
+    base_url: str
     debug: bool
     access_token_lifetime: timedelta = timedelta(minutes=30)
     refresh_token_lifetime: timedelta = timedelta(days=1)

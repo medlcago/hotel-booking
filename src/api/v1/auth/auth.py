@@ -8,14 +8,25 @@ from schemas.auth import (
     SignInRequest
 )
 from schemas.token import Token
+from schemas.user import UserResponse
 from use_cases.auth import IAuthUseCase
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+@router.get("/verify-email")
+@inject
+async def verify_email(
+        token: str,
+        auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
+):
+    await auth_use_case.verify_email(token=token)
+    return {"message": "E-mail successfully confirmed!"}
+
+
 @router.post(
     path="/sign-up",
-    response_model=Token,
+    response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_409_CONFLICT: {

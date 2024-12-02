@@ -5,6 +5,7 @@ import bcrypt
 import jwt
 from fastapi.requests import Request
 from fastapi.security import HTTPBearer
+from itsdangerous import URLSafeTimedSerializer, BadData
 from pydantic import SecretStr
 
 from core.exceptions import UnauthorizedException
@@ -21,6 +22,19 @@ def _get_secret(secret: str | SecretStr) -> str:
 SECRET_KEY = settings.secret_key
 ALGORITHM = "HS256"
 DEFAULT_TOKEN_LIFETIME = timedelta(minutes=10)
+
+serializer = URLSafeTimedSerializer(secret_key=_get_secret(SECRET_KEY))
+
+
+def create_url_safe_token(data: dict[str, Any]) -> str:
+    return serializer.dumps(data)
+
+
+def decode_url_safe_token(token: str, max_age: int | None = None) -> dict[str, Any] | None:
+    try:
+        return serializer.loads(token, max_age=max_age)
+    except BadData:
+        return None
 
 
 def hash_password(password: str) -> str:

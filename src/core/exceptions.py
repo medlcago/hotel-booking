@@ -120,3 +120,7 @@ class ReviewAlreadyExists(ConflictException):
 
 class ReviewDeleteNotAllowed(ForbiddenException):
     description = "You have not allowed to delete this review."
+
+
+class LinkExpired(BadRequestException):
+    description = "The link has expired."

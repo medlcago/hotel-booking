@@ -5,11 +5,12 @@ from schemas.auth import (
     SignUpRequest
 )
 from schemas.token import Token
+from schemas.user import UserResponse
 from .auth_service import AuthService
 
 
 class IAuthService(Protocol):
-    async def sign_up(self, schema: SignUpRequest) -> Token:
+    async def sign_up(self, schema: SignUpRequest) -> UserResponse:
         ...
 
     async def sign_in(self, schema: SignInRequest) -> Token:
@@ -20,4 +21,7 @@ class IAuthService(Protocol):
         ...
 
     async def refresh_token(self, user_id: int) -> Token:
+        ...
+
+    async def verify_email(self, token: str) -> None:
         ...
