@@ -1,9 +1,12 @@
+import logging
+import sys
+
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
 
-from core.logger import logger
+logger = logging.getLogger("hotel_booking")
 
 
 async def init_cache(
@@ -17,4 +20,5 @@ async def init_cache(
         FastAPICache.init(RedisBackend(redis=redis), prefix=prefix, expire=expire)
         return
     except RedisError as ex:
-        logger.error(f"Failed to init Redis cache: {ex}")
+        logger.exception(f"Failed to init Redis cache: {ex}")
+        sys.exit(1)

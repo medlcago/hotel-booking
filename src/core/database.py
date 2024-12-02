@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager, AbstractAsyncContextManager
 from typing import Callable
 
@@ -7,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine
 )
 
-from core.logger import logger
+logger = logging.getLogger("hotel_booking")
 
 
 class Database:
