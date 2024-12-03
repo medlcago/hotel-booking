@@ -19,3 +19,6 @@ class IAuthUseCase(Protocol):
 
     async def verify_email(self, token: str) -> None:
         ...
+
+    async def send_confirmation_email(self, email: str) -> None:
+        ...

@@ -86,6 +86,10 @@ class UserNotVerified(UnauthorizedException):
     description = "Your account has not been verified. Please check your email."
 
 
+class UserAlreadyVerified(BadRequestException):
+    description = "Your account has already been verified."
+
+
 class UserInactive(ForbiddenException):
     description = "Your account has been disabled. Please contact support."
 

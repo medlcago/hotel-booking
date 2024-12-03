@@ -22,3 +22,6 @@ class AuthUseCase:
 
     async def verify_email(self, token: str) -> None:
         return await self.auth_service.verify_email(token=token)
+
+    async def send_confirmation_email(self, email: str) -> None:
+        return await self.auth_service.send_confirmation_email(email=email)

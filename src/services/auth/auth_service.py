@@ -6,6 +6,7 @@ from core.exceptions import (
     BadCredentials,
     UserInactive,
     LinkExpired,
+    UserAlreadyVerified,
 )
 from repositories.user import IUserRepository
 from schemas.auth import SignInRequest
@@ -64,3 +65,11 @@ class AuthService:
         if not user or user.is_verified:
             raise LinkExpired
         await self.user_repository.update_user(user_id=user.id, values=dict(is_verified=True))
+
+    async def send_confirmation_email(self, email: str) -> None:
+        user = await self.user_repository.get_user_by_email(email=email)
+        if not user:
+            raise BadCredentials
+        if user.is_verified:
+            raise UserAlreadyVerified
+        send_confirmation_email.delay(email=email)

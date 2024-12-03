@@ -1,11 +1,12 @@
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, status
 
-from api.deps import refresh_token_bearer
+from api.deps import refresh_token_bearer, CurrentUser
 from core.container import Container
 from schemas.auth import (
     SignUpRequest,
-    SignInRequest
+    SignInRequest,
+    Message
 )
 from schemas.token import Token
 from schemas.user import UserResponse
@@ -14,14 +15,34 @@ from use_cases.auth import IAuthUseCase
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.get("/verify-email")
+@router.post(
+    path="/verify-email",
+    response_model=Message
+)
+@inject
+async def send_confirmation_email(
+        user: CurrentUser,
+        auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
+):
+    await auth_use_case.send_confirmation_email(email=user.email)
+    return Message(
+        message="E-mail successfully sent!"
+    )
+
+
+@router.get(
+    path="/verify-email",
+    response_model=Message
+)
 @inject
 async def verify_email(
         token: str,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
     await auth_use_case.verify_email(token=token)
-    return {"message": "E-mail successfully confirmed!"}
+    return Message(
+        message="E-mail successfully verified!"
+    )
 
 
 @router.post(
