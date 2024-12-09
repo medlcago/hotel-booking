@@ -16,7 +16,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post(
-    path="/verify-email",
+    path="/confirm-email",
     response_model=Message
 )
 @inject
@@ -28,15 +28,15 @@ async def send_confirmation_email(
 
 
 @router.get(
-    path="/verify-email",
+    path="/confirm-email",
     response_model=Message
 )
 @inject
-async def verify_email(
+async def confirm_email(
         token: str,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_use_case.verify_email(token=token)
+    return await auth_use_case.confirm_email(token=token)
 
 
 @router.post(

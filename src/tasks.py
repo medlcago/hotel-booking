@@ -19,7 +19,7 @@ celery.conf.update(
 
 @celery.task(name="send_confirmation_email", ingore_result=True)
 def send_confirmation_email(email: str, token: str) -> None:
-    confirmation_link = f"{settings.base_url}/verify-email?token={token}"
+    confirmation_link = f"{settings.base_url}/confirm-email?token={token}"
     body = render_template("email_confirmation.html", confirmation_link=confirmation_link)
     async_to_sync(send_email)(
         subject="Confirm your email",

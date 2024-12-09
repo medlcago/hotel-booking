@@ -24,7 +24,7 @@ class IAuthService(Protocol):
     async def refresh_token(self, user_id: int) -> Token:
         ...
 
-    async def verify_email(self, token: str) -> Message:
+    async def confirm_email(self, token: str) -> Message:
         ...
 
     async def send_confirmation_email(self, email: str) -> Message:
