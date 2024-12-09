@@ -2,16 +2,15 @@ import re
 from typing import Annotated
 
 import phonenumbers
-from phonenumbers import PhoneNumber
 from pydantic import AfterValidator
 
 
-def validate_phone(phone: str) -> PhoneNumber:
+def validate_phone(phone: str) -> str:
     try:
         parsed_number = phonenumbers.parse(phone, region="RU")
         if not phonenumbers.is_valid_number(parsed_number):
             raise ValueError("Invalid phone number")
-        return parsed_number
+        return phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
     except phonenumbers.NumberParseException:
         raise ValueError("Invalid phone number format")
 
