@@ -6,7 +6,7 @@ from fastapi_cache.decorator import cache
 
 from api.deps import CurrentActiveUser, CurrentVerifiedUser
 from core.container import Container
-from schemas.pagination import PaginationResponse
+from schemas.response import PaginationResponse
 from schemas.review import ReviewCreateRequest, ReviewCreateResponse, ReviewResponse, ReviewParams
 from use_cases.review import IReviewUseCase
 

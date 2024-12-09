@@ -13,7 +13,7 @@ from schemas.hotel import (
     HotelParams,
     HotelUpdate
 )
-from schemas.pagination import PaginationResponse
+from schemas.response import PaginationResponse
 from use_cases.hotel import IHotelUseCase
 
 router = APIRouter(prefix="/hotels", tags=["hotels"])

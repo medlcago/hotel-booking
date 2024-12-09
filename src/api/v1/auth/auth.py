@@ -6,8 +6,8 @@ from core.container import Container
 from schemas.auth import (
     SignUpRequest,
     SignInRequest,
-    Message
 )
+from schemas.response import Message
 from schemas.token import Token
 from schemas.user import UserResponse
 from use_cases.auth import IAuthUseCase
@@ -24,10 +24,7 @@ async def send_confirmation_email(
         user: CurrentUser,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    await auth_use_case.send_confirmation_email(email=user.email)
-    return Message(
-        message="E-mail successfully sent!"
-    )
+    return await auth_use_case.send_confirmation_email(email=user.email)
 
 
 @router.get(
@@ -39,10 +36,7 @@ async def verify_email(
         token: str,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    await auth_use_case.verify_email(token=token)
-    return Message(
-        message="E-mail successfully verified!"
-    )
+    return await auth_use_case.verify_email(token=token)
 
 
 @router.post(

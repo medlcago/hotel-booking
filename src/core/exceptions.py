@@ -79,11 +79,15 @@ class ForbiddenException(APIException):
 
 
 class BadCredentials(UnauthorizedException):
-    description = "Invalid email or password."
+    description = "Bad credentials."
 
 
 class UserNotVerified(UnauthorizedException):
     description = "Your account has not been verified. Please check your email."
+
+
+class UserNotFound(NotFoundException):
+    description = "User not found."
 
 
 class UserAlreadyVerified(BadRequestException):
@@ -126,5 +130,5 @@ class ReviewDeleteNotAllowed(ForbiddenException):
     description = "You have not allowed to delete this review."
 
 
-class LinkExpired(BadRequestException):
-    description = "The link has expired."
+class TokenExpired(BadRequestException):
+    description = "The token has expired."

@@ -7,7 +7,7 @@ from schemas.hotel import (
     HotelParams,
     HotelUpdate
 )
-from schemas.pagination import PaginationResponse
+from schemas.response import PaginationResponse
 from .hotel_use_case import HotelUseCase
 
 

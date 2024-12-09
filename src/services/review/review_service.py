@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from core.exceptions import ReviewAlreadyExists, ReviewDeleteNotAllowed
 from repositories.base import AlreadyExistsError
 from repositories.review import IReviewRepository
-from schemas.pagination import PaginationResponse
+from schemas.response import PaginationResponse
 from schemas.review import (
     ReviewCreateRequest,
     ReviewResponse,

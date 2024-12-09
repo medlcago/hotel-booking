@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from schemas.pagination import PaginationResponse
+from schemas.response import PaginationResponse
 from schemas.room import (
     RoomCreateRequest,
     RoomResponse,

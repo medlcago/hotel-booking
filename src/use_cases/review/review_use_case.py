@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from schemas.pagination import PaginationResponse
+from schemas.response import PaginationResponse
 from schemas.review import ReviewCreateRequest, ReviewResponse, ReviewCreateResponse, ReviewParams
 from services.review import IReviewService
 

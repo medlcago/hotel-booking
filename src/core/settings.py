@@ -1,6 +1,6 @@
 from datetime import timedelta
 from pathlib import Path, PurePath
-
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -63,6 +63,7 @@ class Settings(BaseSettings):
     redis: Redis
     smtp_server: SmtpServer
     celery: Celery
+    templates: Jinja2Templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
     base_url: str
     debug: bool

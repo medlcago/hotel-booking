@@ -1,7 +1,13 @@
 from typing import Protocol
 
-from schemas.pagination import PaginationResponse
-from schemas.user import UserResponse, UserParams
+from schemas.response import Message
+from schemas.response import PaginationResponse
+from schemas.user import (
+    UserResponse,
+    UserParams,
+    PasswordResetRequest,
+    PasswordResetConfirm,
+)
 from .user_service import UserService
 
 
@@ -13,4 +19,10 @@ class IUserService(Protocol):
         ...
 
     async def get_users(self, params: UserParams) -> PaginationResponse[UserResponse]:
+        ...
+
+    async def reset_password(self, schema: PasswordResetRequest) -> Message:
+        ...
+
+    async def confirm_reset_password(self, schema: PasswordResetConfirm) -> Message:
         ...

@@ -5,8 +5,14 @@ from fastapi import APIRouter, status, Depends, Query
 
 from api.deps import CurrentActiveUser, get_current_admin
 from core.container import Container
-from schemas.pagination import PaginationResponse
-from schemas.user import UserResponse, UserParams
+from schemas.response import Message
+from schemas.response import PaginationResponse
+from schemas.user import (
+    UserResponse,
+    UserParams,
+    PasswordResetRequest,
+    PasswordResetConfirm
+)
 from use_cases.user import IUserUseCase
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -45,3 +51,27 @@ async def get_users(
         user_use_case: IUserUseCase = Depends(Provide[Container.user_use_case]),
 ):
     return await user_use_case.get_users(params=params)
+
+
+@router.post(
+    path="/password/reset",
+    response_model=Message
+)
+@inject
+async def reset_password(
+        schema: PasswordResetRequest,
+        user_use_case: IUserUseCase = Depends(Provide[Container.user_use_case]),
+):
+    return await user_use_case.reset_password(schema=schema)
+
+
+@router.post(
+    path="/password/reset/confirm",
+    response_model=Message
+)
+@inject
+async def confirm_password_reset(
+        schema: PasswordResetConfirm,
+        user_use_case: IUserUseCase = Depends(Provide[Container.user_use_case])
+):
+    return await user_use_case.confirm_reset_password(schema=schema)

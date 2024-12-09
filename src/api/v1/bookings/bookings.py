@@ -13,7 +13,7 @@ from schemas.booking import (
     BookingParams,
     BookingCancelRequest
 )
-from schemas.pagination import PaginationResponse
+from schemas.response import PaginationResponse
 from use_cases.booking import IBookingUseCase
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])

@@ -7,7 +7,7 @@ from schemas.booking import (
     BookingParams,
     BookingCancelRequest
 )
-from schemas.pagination import PaginationResponse
+from schemas.response import PaginationResponse
 from .booking_use_case import BookingUseCase
 
 

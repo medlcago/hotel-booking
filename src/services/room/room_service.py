@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from core.exceptions import RoomNotFound
 from repositories.room import IRoomRepository
-from schemas.pagination import PaginationResponse
+from schemas.response import PaginationResponse
 from schemas.room import (
     RoomCreateRequest,
     RoomResponse,

@@ -1,9 +1,10 @@
 from datetime import date
 from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 from schemas.filters import LimitOffset
+from utils.validators import PasswordType
 
 
 class UserParams(LimitOffset):
@@ -16,10 +17,19 @@ class UserParams(LimitOffset):
 class UserResponse(BaseModel):
     id: int
     full_name: str
-    email: str
+    email: EmailStr
     phone: str | None = None
     date_of_birth: date | None = None
     loyalty_points: int
     is_active: bool
     is_verified: bool
     is_admin: bool
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: PasswordType

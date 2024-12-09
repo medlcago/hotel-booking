@@ -6,7 +6,7 @@ from fastapi_cache.decorator import cache
 
 from api.deps import get_current_admin
 from core.container import Container
-from schemas.pagination import PaginationResponse
+from schemas.response import PaginationResponse
 from schemas.room import (
     RoomResponse,
     RoomCreateRequest,

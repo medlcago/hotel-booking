@@ -19,7 +19,7 @@ class Hotel(Base, TimeStampMixin):
     email: Mapped[str | None] = mapped_column(String(300))
     description: Mapped[str | None] = mapped_column(String(500))
 
-    rooms: Mapped[list[Room]] = relationship(back_populates="hotel", lazy="noload")
+    rooms: Mapped[list[Room]] = relationship(back_populates="hotel")
     reviews: Mapped[list[Review]] = relationship(back_populates="hotel")
 
 

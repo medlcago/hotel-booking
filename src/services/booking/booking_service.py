@@ -16,7 +16,7 @@ from schemas.booking import (
     BookingParams,
     BookingCancelRequest
 )
-from schemas.pagination import PaginationResponse
+from schemas.response import PaginationResponse
 
 
 @dataclass(frozen=True, slots=True)
