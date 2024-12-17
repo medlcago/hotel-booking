@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from api import init_api_router
 from api.metrics import init_metrics
-from core.container import Container
+from core.container import ServiceContainer
 from core.exceptions import init_exception_handlers
 from core.settings import settings
 from utils.cache import init_cache
@@ -33,7 +33,7 @@ class APIServer:
         init_exception_handlers(self.app)
         init_api_router(self.app)
 
-        container = Container()
+        container = ServiceContainer()
         self.app.container = container
 
         return self.app

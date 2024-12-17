@@ -73,7 +73,7 @@ class Settings(BaseSettings):
     log_config: PurePath = BASE_DIR / "log_conf.yaml"
 
     model_config = SettingsConfigDict(
-        env_file=BASE_DIR / ".env",
+        env_file=BASE_DIR / ".env.dev",
         env_nested_delimiter="__",
         extra="ignore",
     )

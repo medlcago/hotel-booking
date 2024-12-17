@@ -5,7 +5,7 @@ from fastapi import APIRouter, status, Depends, Query
 from fastapi_cache.decorator import cache
 
 from api.deps import get_current_admin
-from core.container import Container
+from core.container import ServiceContainer
 from schemas.response import PaginationResponse
 from schemas.room import (
     RoomResponse,
@@ -14,7 +14,7 @@ from schemas.room import (
     RoomParams,
     RoomUpdate
 )
-from use_cases.room import IRoomUseCase
+from services.room import IRoomService
 
 router = APIRouter(prefix="/rooms", tags=["rooms"])
 
@@ -33,9 +33,9 @@ router = APIRouter(prefix="/rooms", tags=["rooms"])
 @inject
 async def add_room(
         schema: RoomCreateRequest,
-        room_use_case: IRoomUseCase = Depends(Provide[Container.room_use_case])
+        room_service: IRoomService = Depends(Provide[ServiceContainer.room_service])
 ):
-    return await room_use_case.add_room(schema=schema)
+    return await room_service.add_room(schema=schema)
 
 
 @router.get(
@@ -51,10 +51,9 @@ async def add_room(
 @inject
 async def get_room_by_id(
         room_id: int,
-        room_use_case: IRoomUseCase = Depends(Provide[Container.room_use_case]),
+        room_service: IRoomService = Depends(Provide[ServiceContainer.room_service])
 ):
-    room = await room_use_case.get_room_by_id(room_id=room_id)
-    return room
+    return await room_service.get_room_by_id(room_id=room_id)
 
 
 @router.get(
@@ -65,9 +64,9 @@ async def get_room_by_id(
 @inject
 async def get_rooms(
         params: Annotated[RoomParams, Query()],
-        room_use_case: IRoomUseCase = Depends(Provide[Container.room_use_case])
+        room_service: IRoomService = Depends(Provide[ServiceContainer.room_service])
 ):
-    return await room_use_case.get_rooms(params=params)
+    return await room_service.get_rooms(params=params)
 
 
 @router.patch(
@@ -84,6 +83,6 @@ async def get_rooms(
 async def update_room(
         room_id: int,
         schema: RoomUpdate,
-        room_use_case: IRoomUseCase = Depends(Provide[Container.room_use_case])
+        room_service: IRoomService = Depends(Provide[ServiceContainer.room_service])
 ):
-    return await room_use_case.update_room(room_id=room_id, schema=schema)
+    return await room_service.update_room(room_id=room_id, schema=schema)
