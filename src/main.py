@@ -19,10 +19,12 @@ class APIServer:
             debug=settings.debug
         )
 
+        self.container = ServiceContainer()
+        self.app.container = self.container
+
     @asynccontextmanager
     async def lifespan(self, _: FastAPI) -> AsyncIterator[None]:
         await init_cache(
-            redis_url=settings.redis.url,
             prefix="fastapi-cache",
             expire=60,
         )
@@ -32,9 +34,6 @@ class APIServer:
         init_metrics(self.app)
         init_exception_handlers(self.app)
         init_api_router(self.app)
-
-        container = ServiceContainer()
-        self.app.container = container
 
         return self.app
 

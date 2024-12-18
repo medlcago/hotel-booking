@@ -5,7 +5,7 @@ from schemas.auth import (
     SignUpRequest
 )
 from schemas.response import Message
-from schemas.token import Token
+from schemas.token import Token, TokenResult
 from schemas.user import UserResponse
 from .auth_service import AuthService
 
@@ -21,11 +21,14 @@ class IAuthService(Protocol):
     def get_token(user_id: int) -> Token:
         ...
 
-    async def refresh_token(self, user_id: int) -> Token:
+    async def refresh_token(self, result: TokenResult) -> Token:
         ...
 
     async def confirm_email(self, token: str) -> Message:
         ...
 
     async def send_confirmation_email(self, email: str) -> Message:
+        ...
+
+    async def revoke_token(self, result: TokenResult) -> None:
         ...

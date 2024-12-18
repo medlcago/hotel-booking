@@ -11,19 +11,24 @@ from core.exceptions import (
     UserNotVerified
 )
 from core.security import AccessTokenBearer, RefreshTokenBearer
+from schemas.token import TokenResult
 from schemas.user import UserResponse
 from services.user import IUserService
 
 access_token_bearer = AccessTokenBearer()
 refresh_token_bearer = RefreshTokenBearer()
 
+AccessTokenResult = Annotated[TokenResult, Depends(access_token_bearer)]
+
+RefreshTokenResult = Annotated[TokenResult, Depends(refresh_token_bearer)]
+
 
 @inject
 async def get_current_user(
-        user_id: int = Depends(access_token_bearer),
+        result: AccessTokenResult,
         user_service: IUserService = Depends(Provide[ServiceContainer.user_service])
 ) -> UserResponse:
-    user = await user_service.get_user_by_id(user_id=user_id)
+    user = await user_service.get_user_by_id(user_id=result.user_id)
     if not user:
         raise UnauthorizedException
     return user

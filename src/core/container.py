@@ -1,4 +1,5 @@
 from dependency_injector import containers, providers
+from redis.asyncio import Redis
 
 from core.database import Database
 from core.settings import settings
@@ -13,6 +14,7 @@ from services.hotel import HotelService
 from services.review import ReviewService
 from services.room import RoomService
 from services.user import UserService
+from stores.redis import RedisStore
 
 
 class RepositoryContainer(containers.DeclarativeContainer):
@@ -61,11 +63,22 @@ class ServiceContainer(containers.DeclarativeContainer):
             "api.v1.reviews.reviews",
             "api.v1.bookings.bookings",
             "api.deps",
+            "utils.cache",
         ]
     )
 
     repositories = providers.Container(
         RepositoryContainer,
+    )
+
+    redis = providers.Singleton(
+        Redis.from_url,
+        url=settings.redis.url,
+    )
+
+    redis_store = providers.Singleton(
+        RedisStore,
+        redis=redis
     )
 
     user_service = providers.Factory(
@@ -86,6 +99,7 @@ class ServiceContainer(containers.DeclarativeContainer):
     auth_service = providers.Factory(
         AuthService,
         user_repository=repositories.user_repository,
+        store=redis_store
     )
 
     review_service = providers.Factory(

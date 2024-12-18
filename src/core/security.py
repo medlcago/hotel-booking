@@ -11,6 +11,7 @@ from pydantic import SecretStr
 from core.exceptions import UnauthorizedException
 from core.settings import settings
 from enums.token import TokenType
+from schemas.token import TokenResult
 
 
 def _get_secret(secret: str | SecretStr) -> str:
@@ -107,7 +108,7 @@ def decode_token(token: str) -> dict[str, Any]:
 
 
 class TokenBearer(HTTPBearer):
-    async def __call__(self, request: Request) -> int:
+    async def __call__(self, request: Request) -> TokenResult:
         credentials = await super().__call__(request)
         if not credentials:
             raise UnauthorizedException("Invalid credentials")
@@ -115,7 +116,12 @@ class TokenBearer(HTTPBearer):
         if not token_data:
             raise UnauthorizedException("Invalid token")
         self.verify_token_data(token_data)
-        return self.get_user_id(token_data=token_data)
+        user_id = self.get_user_id(token_data=token_data)
+        return TokenResult(
+            token=credentials.credentials,
+            token_type=token_data.get("token_type"),
+            user_id=user_id
+        )
 
     def verify_token_data(self, token_data: dict[str, Any]) -> None:
         raise NotImplementedError

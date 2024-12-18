@@ -1,24 +1,31 @@
+from __future__ import annotations
+
 import logging
 import sys
+from typing import TYPE_CHECKING
 
+from dependency_injector.wiring import inject, Provide
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-from redis.asyncio import Redis
 from redis.exceptions import RedisError
+
+from core.container import ServiceContainer
+
+if TYPE_CHECKING:
+    from redis.asyncio import Redis
 
 logger = logging.getLogger("hotel_booking")
 
 
+@inject
 async def init_cache(
-        redis_url: str,
+        redis: Redis = Provide[ServiceContainer.redis],
         prefix: str = "",
         expire: int = 60
 ) -> None:
     try:
-        redis = Redis.from_url(url=redis_url)
         await redis.ping()
         FastAPICache.init(RedisBackend(redis=redis), prefix=prefix, expire=expire)
-        return
     except RedisError as ex:
         logger.exception(f"Failed to init Redis cache: {ex}")
         sys.exit(1)

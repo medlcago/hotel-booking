@@ -8,18 +8,22 @@ from core.exceptions import (
     TokenExpired,
     UserAlreadyVerified,
 )
+from core.settings import settings
+from enums.token import TokenType
 from repositories.user import IUserRepository
 from schemas.auth import SignInRequest
 from schemas.auth import SignUpRequest
 from schemas.response import Message
-from schemas.token import Token
+from schemas.token import Token, TokenResult
 from schemas.user import UserResponse
+from stores.base import Store
 from tasks import send_confirmation_email
 
 
 @dataclass(frozen=True, slots=True)
 class AuthService:
     user_repository: IUserRepository
+    store: Store
 
     async def sign_up(self, schema: SignUpRequest) -> UserResponse:
         user = await self.user_repository.get_user_by_email(email=schema.email)
@@ -53,8 +57,9 @@ class AuthService:
             refresh_token=refresh_token
         )
 
-    async def refresh_token(self, user_id: int) -> Token:
-        return self.get_token(user_id=user_id)
+    async def refresh_token(self, result: TokenResult) -> Token:
+        await self.revoke_token(result=result)
+        return self.get_token(user_id=result.user_id)
 
     async def confirm_email(self, token: str) -> Message:
         payload = security.decode_url_safe_token(token=token, max_age=86400)
@@ -82,3 +87,13 @@ class AuthService:
         return Message(
             message="E-mail successfully sent!"
         )
+
+    async def revoke_token(self, result: TokenResult) -> None:
+        is_refresh_token = result.token_type == TokenType.refresh
+        key = f"{result.token_type}:{result.token}:{result.user_id}"
+        exists = await self.store.exists(key=key)
+        if exists:
+            raise TokenExpired
+
+        expires_in = settings.refresh_token_lifetime if is_refresh_token else settings.access_token_lifetime
+        await self.store.set(key=key, value=result.token, expires_in=expires_in)

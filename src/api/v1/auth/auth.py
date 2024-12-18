@@ -1,7 +1,7 @@
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, status
 
-from api.deps import refresh_token_bearer, CurrentUser
+from api.deps import CurrentUser, RefreshTokenResult
 from core.container import ServiceContainer
 from schemas.auth import (
     SignUpRequest,
@@ -83,12 +83,38 @@ async def sign_in(
         },
         status.HTTP_403_FORBIDDEN: {
             "description": "Not authenticated",
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "The token has expired",
         }
     }
 )
 @inject
 async def refresh_token(
-        user_id: int = Depends(refresh_token_bearer),
+        result: RefreshTokenResult,
         auth_service: IAuthService = Depends(Provide[ServiceContainer.auth_service])
 ):
-    return await auth_service.refresh_token(user_id=user_id)
+    return await auth_service.refresh_token(result=result)
+
+
+@router.post(
+    path="/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Invalid token",
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Not authenticated",
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "The token has expired",
+        }
+    }
+)
+@inject
+async def logout(
+        result: RefreshTokenResult,
+        auth_service: IAuthService = Depends(Provide[ServiceContainer.auth_service])
+):
+    await auth_service.revoke_token(result=result)
