@@ -1,8 +1,8 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from core.types import SortOrderType
+SortOrderType = Literal["asc", "desc"]
 
 
 class LimitOffset(BaseModel):

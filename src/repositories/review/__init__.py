@@ -1,12 +1,12 @@
-from typing import Protocol, Any
+from abc import ABC
+from typing import Any
 
-from core.types import SortOrderType
 from models import Review
 from repositories.base import Result
-from .review_repo import ReviewRepository
+from schemas.filters import SortOrderType
 
 
-class IReviewRepository(Protocol):
+class IReviewRepository(ABC):
     async def add_review(self, values: dict[str, Any]) -> Review:
         ...
 

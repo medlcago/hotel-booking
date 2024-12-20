@@ -1,12 +1,12 @@
-from typing import Protocol, Any
+from abc import ABC
+from typing import Any
 
-from core.types import SortOrderType
 from models import Hotel
 from repositories.base import Result
-from .hotel_repo import HotelRepository
+from schemas.filters import SortOrderType
 
 
-class IHotelRepository(Protocol):
+class IHotelRepository(ABC):
     async def add_hotel(self, values: dict[str, Any]) -> Hotel:
         ...
 

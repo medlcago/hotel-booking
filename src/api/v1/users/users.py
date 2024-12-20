@@ -4,7 +4,7 @@ from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, status, Depends, Query
 
 from api.deps import CurrentActiveUser, get_current_admin
-from core.container import ServiceContainer
+from core.container import Container
 from schemas.response import Message
 from schemas.response import PaginationResponse
 from schemas.user import (
@@ -48,7 +48,7 @@ async def get_me(user: CurrentActiveUser):
 @inject
 async def get_users(
         params: Annotated[UserParams, Query()],
-        user_service: IUserService = Depends(Provide[ServiceContainer.user_service])
+        user_service: IUserService = Depends(Provide[Container.user_service])
 ):
     return await user_service.get_users(params=params)
 
@@ -65,7 +65,7 @@ async def get_users(
 @inject
 async def reset_password(
         schema: PasswordResetRequest,
-        user_service: IUserService = Depends(Provide[ServiceContainer.user_service])
+        user_service: IUserService = Depends(Provide[Container.user_service])
 ):
     return await user_service.reset_password(schema=schema)
 
@@ -82,6 +82,6 @@ async def reset_password(
 @inject
 async def confirm_password_reset(
         schema: PasswordResetConfirm,
-        user_service: IUserService = Depends(Provide[ServiceContainer.user_service])
+        user_service: IUserService = Depends(Provide[Container.user_service])
 ):
     return await user_service.confirm_reset_password(schema=schema)

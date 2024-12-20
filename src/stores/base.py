@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import timedelta
 from types import TracebackType
+from typing import Self
 
 
 class Store(ABC):
@@ -26,8 +27,8 @@ class Store(ABC):
     async def expires_in(self, key: str) -> int | None:
         raise NotImplementedError
 
-    async def __aenter__(self) -> None:
-        pass
+    async def __aenter__(self) -> Self:
+        return self
 
     async def __aexit__(
             self,

@@ -1,12 +1,12 @@
+from abc import ABC
 from datetime import date
-from typing import Protocol, Any
+from typing import Any
 
 from models import Room
 from repositories.base import Result
-from .room_repo import RoomRepository
 
 
-class IRoomRepository(Protocol):
+class IRoomRepository(ABC):
     async def add_room(self, values: dict[str, Any]) -> Room:
         ...
 

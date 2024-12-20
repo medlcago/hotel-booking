@@ -2,8 +2,7 @@ from typing import Annotated, Any
 
 from pydantic import BaseModel, Field, EmailStr, PositiveInt, field_validator
 
-from core.types import SortOrderType
-from schemas.filters import LimitOffset, OrderBy
+from schemas.filters import LimitOffset, OrderBy, SortOrderType
 from utils.validators import PhoneType
 
 

@@ -5,7 +5,7 @@ from fastapi import APIRouter, status, Depends, Query
 from fastapi_cache.decorator import cache
 
 from api.deps import CurrentActiveUser, CurrentVerifiedUser
-from core.container import ServiceContainer
+from core.container import Container
 from schemas.response import PaginationResponse
 from schemas.review import ReviewCreateRequest, ReviewCreateResponse, ReviewResponse, ReviewParams
 from services.review import IReviewService
@@ -34,7 +34,7 @@ router = APIRouter(prefix="/reviews", tags=["reviews"])
 async def add_review(
         schema: ReviewCreateRequest,
         user: CurrentVerifiedUser,
-        review_service: IReviewService = Depends(Provide[ServiceContainer.review_service])
+        review_service: IReviewService = Depends(Provide[Container.review_service])
 ):
     return await review_service.add_review(schema=schema, user_id=user.id)
 
@@ -47,7 +47,7 @@ async def add_review(
 @inject
 async def get_reviews(
         params: Annotated[ReviewParams, Query()],
-        review_service: IReviewService = Depends(Provide[ServiceContainer.review_service])
+        review_service: IReviewService = Depends(Provide[Container.review_service])
 ):
     return await review_service.get_reviews(params=params)
 
@@ -65,6 +65,6 @@ async def get_reviews(
 async def delete_review(
         review_id: int,
         user: CurrentActiveUser,
-        review_service: IReviewService = Depends(Provide[ServiceContainer.review_service])
+        review_service: IReviewService = Depends(Provide[Container.review_service])
 ):
     await review_service.delete_review(review_id=review_id, user_id=user.id)

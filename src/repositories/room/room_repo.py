@@ -6,9 +6,12 @@ from sqlalchemy.exc import IntegrityError
 
 from models import Room, Booking
 from repositories.base import Repository, Result, AlreadyExistsError
+from repositories.room import IRoomRepository
+
+__all__ = ("RoomRepository", "IRoomRepository")
 
 
-class RoomRepository(Repository[Room]):
+class RoomRepository(IRoomRepository, Repository[Room]):
     table = Room
 
     async def add_room(self, values: dict[str, Any]) -> Room:
@@ -18,8 +21,7 @@ class RoomRepository(Repository[Room]):
             returning(self.table)
         )
         try:
-            async with self.session_factory() as session:
-                return await session.scalar(room_stmt)
+            return await self.session.scalar(room_stmt)
         except IntegrityError:
             raise AlreadyExistsError
 
@@ -28,8 +30,7 @@ class RoomRepository(Repository[Room]):
             select(self.table).
             filter_by(id=room_id)
         )
-        async with self.session_factory() as session:
-            return await session.scalar(room_stmt)
+        return await self.session.scalar(room_stmt)
 
     async def get_rooms(
             self,
@@ -69,13 +70,12 @@ class RoomRepository(Repository[Room]):
             filter(self.table.id.notin_(select(cte.c.room_id)))
         )
 
-        async with self.session_factory() as session:
-            rooms = (await session.scalars(rooms_stmt)).all()
-            count = await session.scalar(count_stmt)
-            return Result(
-                count=count,
-                items=rooms,
-            )
+        rooms = (await self.session.scalars(rooms_stmt)).all()
+        count = await self.session.scalar(count_stmt)
+        return Result(
+            count=count,
+            items=rooms,
+        )
 
     async def update_room(self, room_id: int, values: dict[str, Any]) -> Room | None:
         room_stmt = (
@@ -84,5 +84,4 @@ class RoomRepository(Repository[Room]):
             values(**values).
             returning(self.table)
         )
-        async with self.session_factory() as session:
-            return await session.scalar(room_stmt)
+        return await self.session.scalar(room_stmt)

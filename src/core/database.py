@@ -1,6 +1,4 @@
 import logging
-from contextlib import asynccontextmanager, AbstractAsyncContextManager
-from typing import Callable
 
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -33,15 +31,6 @@ class Database:
             autoflush=False,
         )
 
-    @asynccontextmanager
-    async def session(self) -> Callable[..., AbstractAsyncContextManager[AsyncSession]]:
-        session = self.async_session()
-        try:
-            yield session
-            await session.commit()
-        except Exception as ex:
-            logger.exception(f"Session rollback because of {ex}")
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
+    @property
+    async def session(self) -> AsyncSession:
+        return self.async_session()

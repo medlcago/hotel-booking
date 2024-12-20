@@ -1,11 +1,11 @@
-from typing import Protocol, Any
+from abc import ABC
+from typing import Any
 
 from models import User
 from repositories.base import Result
-from .user_repo import UserRepository
 
 
-class IUserRepository(Protocol):
+class IUserRepository(ABC):
     async def create_user(self, values: dict[str, Any]) -> User:
         ...
 

@@ -2,7 +2,7 @@ from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, status
 
 from api.deps import CurrentUser, RefreshTokenResult
-from core.container import ServiceContainer
+from core.container import Container
 from schemas.auth import (
     SignUpRequest,
     SignInRequest,
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @inject
 async def send_confirmation_email(
         user: CurrentUser,
-        auth_service: IAuthService = Depends(Provide[ServiceContainer.auth_service])
+        auth_service: IAuthService = Depends(Provide[Container.auth_service])
 ):
     return await auth_service.send_confirmation_email(email=user.email)
 
@@ -34,7 +34,7 @@ async def send_confirmation_email(
 @inject
 async def confirm_email(
         token: str,
-        auth_service: IAuthService = Depends(Provide[ServiceContainer.auth_service])
+        auth_service: IAuthService = Depends(Provide[Container.auth_service])
 ):
     return await auth_service.confirm_email(token=token)
 
@@ -52,7 +52,7 @@ async def confirm_email(
 @inject
 async def sign_up(
         schema: SignUpRequest,
-        auth_service: IAuthService = Depends(Provide[ServiceContainer.auth_service])
+        auth_service: IAuthService = Depends(Provide[Container.auth_service])
 ):
     return await auth_service.sign_up(schema=schema)
 
@@ -69,7 +69,7 @@ async def sign_up(
 @inject
 async def sign_in(
         schema: SignInRequest,
-        auth_service: IAuthService = Depends(Provide[ServiceContainer.auth_service])
+        auth_service: IAuthService = Depends(Provide[Container.auth_service])
 ):
     return await auth_service.sign_in(schema=schema)
 
@@ -92,7 +92,7 @@ async def sign_in(
 @inject
 async def refresh_token(
         result: RefreshTokenResult,
-        auth_service: IAuthService = Depends(Provide[ServiceContainer.auth_service])
+        auth_service: IAuthService = Depends(Provide[Container.auth_service])
 ):
     return await auth_service.refresh_token(result=result)
 
@@ -115,6 +115,6 @@ async def refresh_token(
 @inject
 async def logout(
         result: RefreshTokenResult,
-        auth_service: IAuthService = Depends(Provide[ServiceContainer.auth_service])
+        auth_service: IAuthService = Depends(Provide[Container.auth_service])
 ):
     await auth_service.revoke_token(result=result)

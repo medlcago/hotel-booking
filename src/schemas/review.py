@@ -3,8 +3,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, PositiveInt, Field
 
-from core.types import SortOrderType
-from schemas.filters import LimitOffset, OrderBy
+from schemas.filters import LimitOffset, OrderBy, SortOrderType
 
 
 class ReviewParams(LimitOffset, OrderBy):

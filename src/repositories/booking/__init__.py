@@ -1,12 +1,12 @@
+from abc import ABC
 from datetime import date
-from typing import Protocol, Any
+from typing import Any
 
 from models import Booking
 from repositories.base import Result
-from .booking_repo import BookingRepository
 
 
-class IBookingRepository(Protocol):
+class IBookingRepository(ABC):
     async def create_booking(self, values: dict[str, Any]) -> Booking:
         ...
 

@@ -3,12 +3,15 @@ from typing import Any
 from sqlalchemy import insert, select, func, delete
 from sqlalchemy.exc import IntegrityError
 
-from core.types import SortOrderType
 from models import Review
 from repositories.base import Repository, AlreadyExistsError, Result
+from repositories.review import IReviewRepository
+from schemas.filters import SortOrderType
+
+__all__ = ("ReviewRepository", "IReviewRepository")
 
 
-class ReviewRepository(Repository[Review]):
+class ReviewRepository(IReviewRepository, Repository[Review]):
     table = Review
 
     async def add_review(self, values: dict[str, Any]) -> Review:
@@ -18,8 +21,7 @@ class ReviewRepository(Repository[Review]):
             returning(self.table)
         )
         try:
-            async with self.session_factory() as session:
-                return await session.scalar(review_stmt)
+            return await self.session.scalar(review_stmt)
         except IntegrityError:
             raise AlreadyExistsError
 
@@ -46,26 +48,23 @@ class ReviewRepository(Repository[Review]):
             filter_by(**kwargs)
         )
 
-        async with self.session_factory() as session:
-            reviews = (await session.scalars(reviews_stmt)).all()
-            count = await session.scalar(count_stmt)
-            return Result(
-                count=count,
-                items=reviews,
-            )
+        reviews = (await self.session.scalars(reviews_stmt)).all()
+        count = await self.session.scalar(count_stmt)
+        return Result(
+            count=count,
+            items=reviews,
+        )
 
     async def get_user_review(self, review_id: int, user_id: int) -> Review | None:
         review_stmt = (
             select(self.table).
             filter_by(id=review_id, user_id=user_id)
         )
-        async with self.session_factory() as session:
-            return await session.scalar(review_stmt)
+        return await self.session.scalar(review_stmt)
 
     async def delete_review(self, review_id: int, user_id: int) -> None:
         review_stmt = (
             delete(self.table).
             filter_by(id=review_id, user_id=user_id)
         )
-        async with self.session_factory() as session:
-            await session.execute(review_stmt)
+        await self.session.execute(review_stmt)

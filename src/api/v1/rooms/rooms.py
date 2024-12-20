@@ -5,7 +5,7 @@ from fastapi import APIRouter, status, Depends, Query
 from fastapi_cache.decorator import cache
 
 from api.deps import get_current_admin
-from core.container import ServiceContainer
+from core.container import Container
 from schemas.response import PaginationResponse
 from schemas.room import (
     RoomResponse,
@@ -33,7 +33,7 @@ router = APIRouter(prefix="/rooms", tags=["rooms"])
 @inject
 async def add_room(
         schema: RoomCreateRequest,
-        room_service: IRoomService = Depends(Provide[ServiceContainer.room_service])
+        room_service: IRoomService = Depends(Provide[Container.room_service])
 ):
     return await room_service.add_room(schema=schema)
 
@@ -51,7 +51,7 @@ async def add_room(
 @inject
 async def get_room_by_id(
         room_id: int,
-        room_service: IRoomService = Depends(Provide[ServiceContainer.room_service])
+        room_service: IRoomService = Depends(Provide[Container.room_service])
 ):
     return await room_service.get_room_by_id(room_id=room_id)
 
@@ -64,7 +64,7 @@ async def get_room_by_id(
 @inject
 async def get_rooms(
         params: Annotated[RoomParams, Query()],
-        room_service: IRoomService = Depends(Provide[ServiceContainer.room_service])
+        room_service: IRoomService = Depends(Provide[Container.room_service])
 ):
     return await room_service.get_rooms(params=params)
 
@@ -83,6 +83,6 @@ async def get_rooms(
 async def update_room(
         room_id: int,
         schema: RoomUpdate,
-        room_service: IRoomService = Depends(Provide[ServiceContainer.room_service])
+        room_service: IRoomService = Depends(Provide[Container.room_service])
 ):
     return await room_service.update_room(room_id=room_id, schema=schema)

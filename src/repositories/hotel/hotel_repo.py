@@ -3,12 +3,15 @@ from typing import Any
 from sqlalchemy import insert, select, func, update
 from sqlalchemy.orm import selectinload, undefer
 
-from core.types import SortOrderType
 from models import Hotel
 from repositories.base import Repository, Result
+from repositories.hotel import IHotelRepository
+from schemas.filters import SortOrderType
+
+__all__ = ("HotelRepository", "IHotelRepository")
 
 
-class HotelRepository(Repository[Hotel]):
+class HotelRepository(IHotelRepository, Repository[Hotel]):
     table = Hotel
 
     async def add_hotel(self, values: dict[str, Any]) -> Hotel:
@@ -17,9 +20,7 @@ class HotelRepository(Repository[Hotel]):
             values(**values).
             returning(self.table)
         )
-        async with self.session_factory() as session:
-            hotel = await session.scalar(hotel_stmt)
-            return hotel
+        return await self.session.scalar(hotel_stmt)
 
     async def get_hotel_by_id(self, hotel_id: int) -> Hotel | None:
         hotel_stmt = (
@@ -27,8 +28,7 @@ class HotelRepository(Repository[Hotel]):
             filter_by(id=hotel_id).
             options(selectinload(self.table.rooms), undefer(self.table.rating))  # noqa
         )
-        async with self.session_factory() as session:
-            return await session.scalar(hotel_stmt)
+        return await self.session.scalar(hotel_stmt)
 
     async def get_hotels(
             self,
@@ -58,13 +58,12 @@ class HotelRepository(Repository[Hotel]):
             hotels_stmt = hotels_stmt.filter(self.table.location.ilike(f"%{location}%"))
             count_stmt = count_stmt.filter(self.table.location.ilike(f"%{location}%"))
 
-        async with self.session_factory() as session:
-            hotels = (await session.scalars(hotels_stmt)).all()
-            count = (await session.scalar(count_stmt))
-            return Result(
-                count=count,
-                items=hotels,
-            )
+        hotels = (await self.session.scalars(hotels_stmt)).all()
+        count = (await self.session.scalar(count_stmt))
+        return Result(
+            count=count,
+            items=hotels,
+        )
 
     async def update_hotel(self, hotel_id: int, values: dict[str, Any]) -> Hotel | None:
         hotel_stmt = (
@@ -73,5 +72,4 @@ class HotelRepository(Repository[Hotel]):
             values(**values).
             returning(self.table)
         )
-        async with self.session_factory() as session:
-            return await session.scalar(hotel_stmt)
+        return await self.session.scalar(hotel_stmt)

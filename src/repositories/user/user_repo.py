@@ -5,9 +5,12 @@ from sqlalchemy.exc import IntegrityError
 
 from models import User
 from repositories.base import Repository, AlreadyExistsError, Result
+from repositories.user import IUserRepository
+
+__all__ = ("UserRepository", "IUserRepository")
 
 
-class UserRepository(Repository[User]):
+class UserRepository(IUserRepository, Repository[User]):
     table = User
 
     async def create_user(self, values: dict[str, Any]) -> User:
@@ -17,8 +20,7 @@ class UserRepository(Repository[User]):
             returning(self.table)
         )
         try:
-            async with self.session_factory() as session:
-                return await session.scalar(user_stmt)
+            return await self.session.scalar(user_stmt)
         except IntegrityError:
             raise AlreadyExistsError
 
@@ -27,16 +29,14 @@ class UserRepository(Repository[User]):
             select(self.table).
             filter_by(id=user_id)
         )
-        async with self.session_factory() as session:
-            return await session.scalar(user_stmt)
+        return await self.session.scalar(user_stmt)
 
     async def get_user_by_email(self, email: str) -> User | None:
         user_stmt = (
             select(self.table).
             filter_by(email=email)
         )
-        async with self.session_factory() as session:
-            return await session.scalar(user_stmt)
+        return await self.session.scalar(user_stmt)
 
     async def get_users(self, limit: int, offset: int, **kwargs) -> Result[User]:
         users_stmt = (
@@ -50,13 +50,12 @@ class UserRepository(Repository[User]):
             filter_by(**kwargs)
         )
 
-        async with self.session_factory() as session:
-            users = (await session.scalars(users_stmt)).all()
-            count = await session.scalar(count_stmt)
-            return Result(
-                count=count,
-                items=users
-            )
+        users = (await self.session.scalars(users_stmt)).all()
+        count = await self.session.scalar(count_stmt)
+        return Result(
+            count=count,
+            items=users
+        )
 
     async def update_user(self, user_id: int, values: dict[str, Any]) -> User | None:
         user_stmt = (
@@ -65,5 +64,4 @@ class UserRepository(Repository[User]):
             values(**values).
             returning(self.table)
         )
-        async with self.session_factory() as session:
-            return await session.scalar(user_stmt)
+        return await self.session.scalar(user_stmt)

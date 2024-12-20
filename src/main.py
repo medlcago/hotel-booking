@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from api import init_api_router
 from api.metrics import init_metrics
-from core.container import ServiceContainer
+from core.container import Container
 from core.exceptions import init_exception_handlers
 from core.settings import settings
 from utils.cache import init_cache
@@ -19,12 +19,13 @@ class APIServer:
             debug=settings.debug
         )
 
-        self.container = ServiceContainer()
+        self.container = Container()
         self.app.container = self.container
 
     @asynccontextmanager
     async def lifespan(self, _: FastAPI) -> AsyncIterator[None]:
         await init_cache(
+            redis_url=settings.redis.url,
             prefix="fastapi-cache",
             expire=60,
         )

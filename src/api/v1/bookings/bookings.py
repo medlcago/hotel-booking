@@ -5,7 +5,7 @@ from fastapi import APIRouter, status, Depends, Query
 from fastapi_cache.decorator import cache
 
 from api.deps import CurrentActiveUser, CurrentVerifiedUser
-from core.container import ServiceContainer
+from core.container import Container
 from schemas.booking import (
     BookingCreateRequest,
     BookingCreateResponse,
@@ -36,7 +36,7 @@ router = APIRouter(prefix="/bookings", tags=["bookings"])
 async def create_booking(
         user: CurrentVerifiedUser,
         schema: BookingCreateRequest,
-        booking_service: IBookingService = Depends(Provide[ServiceContainer.booking_service])
+        booking_service: IBookingService = Depends(Provide[Container.booking_service])
 ):
     return await booking_service.create_booking(schema=schema, user_id=user.id)
 
@@ -57,7 +57,7 @@ async def create_booking(
 async def cancel_booking(
         user: CurrentActiveUser,
         schema: BookingCancelRequest,
-        booking_service: IBookingService = Depends(Provide[ServiceContainer.booking_service])
+        booking_service: IBookingService = Depends(Provide[Container.booking_service])
 ):
     await booking_service.cancel_booking(schema=schema, user_id=user.id)
 
@@ -76,7 +76,7 @@ async def cancel_booking(
 async def get_booking(
         user: CurrentActiveUser,
         booking_id: int,
-        booking_service: IBookingService = Depends(Provide[ServiceContainer.booking_service])
+        booking_service: IBookingService = Depends(Provide[Container.booking_service])
 ):
     return await booking_service.get_booking(booking_id=booking_id, user_id=user.id)
 
@@ -90,6 +90,6 @@ async def get_booking(
 async def get_bookings(
         user: CurrentActiveUser,
         params: Annotated[BookingParams, Query()],
-        booking_service: IBookingService = Depends(Provide[ServiceContainer.booking_service])
+        booking_service: IBookingService = Depends(Provide[Container.booking_service])
 ):
     return await booking_service.get_bookings(user_id=user.id, params=params)

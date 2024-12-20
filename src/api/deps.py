@@ -3,7 +3,7 @@ from typing import Annotated
 from dependency_injector.wiring import inject, Provide
 from fastapi import Depends
 
-from core.container import ServiceContainer
+from core.container import Container
 from core.exceptions import (
     UnauthorizedException,
     ForbiddenException,
@@ -26,7 +26,7 @@ RefreshTokenResult = Annotated[TokenResult, Depends(refresh_token_bearer)]
 @inject
 async def get_current_user(
         result: AccessTokenResult,
-        user_service: IUserService = Depends(Provide[ServiceContainer.user_service])
+        user_service: IUserService = Depends(Provide[Container.user_service])
 ) -> UserResponse:
     user = await user_service.get_user_by_id(user_id=result.user_id)
     if not user:

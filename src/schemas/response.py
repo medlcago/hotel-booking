@@ -1,8 +1,8 @@
-from typing import Generic
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel
 
-from core.types import ModelType
+ModelType = TypeVar("ModelType", bound=BaseModel)
 
 
 class PaginationResponse(BaseModel, Generic[ModelType]):

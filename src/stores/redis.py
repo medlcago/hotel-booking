@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from redis.asyncio import Redis
 from redis.asyncio.connection import ConnectionPool
 
-from .base import Store
+from stores.base import Store
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -32,7 +32,7 @@ class RedisStore(Store):
         if self.handle_client_shutdown:
             await self.redis.aclose(close_connection_pool=True)
 
-    async def __aenter__(self) -> RedisStore:
+    async def __aenter__(self) -> Self:
         return self
 
     async def __aexit__(
