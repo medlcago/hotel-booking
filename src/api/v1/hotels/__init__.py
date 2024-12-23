@@ -1,1 +1,0 @@
-from .hotels import router

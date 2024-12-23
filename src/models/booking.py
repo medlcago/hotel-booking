@@ -4,7 +4,7 @@ from datetime import date
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -21,7 +21,7 @@ class Booking(Base, TimeStampMixin):
     date_from: Mapped[date]
     date_to: Mapped[date]
     price_per_day: Mapped[Decimal]
-    status: Mapped[bool] = mapped_column(default=True, server_default="1")
+    payment_status: Mapped[str] = mapped_column(String(20), default="pending", server_default="pending")
 
     user: Mapped[User] = relationship(back_populates="bookings")
     room: Mapped[Room] = relationship(back_populates="bookings")

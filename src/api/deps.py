@@ -13,7 +13,7 @@ from core.exceptions import (
 from core.security import AccessTokenBearer, RefreshTokenBearer
 from schemas.token import TokenResult
 from schemas.user import UserResponse
-from services.user import IUserService
+from services.user_service import IUserService
 
 access_token_bearer = AccessTokenBearer()
 refresh_token_bearer = RefreshTokenBearer()

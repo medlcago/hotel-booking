@@ -11,9 +11,14 @@ class APIException(Exception):
     message: str = HTTPStatus.INTERNAL_SERVER_ERROR.phrase
     description: str = HTTPStatus.INTERNAL_SERVER_ERROR.description
 
-    def __init__(self, description: str | None = None):
+    def __init__(
+            self,
+            description: str | None = None,
+            headers: dict[str, str] | None = None
+    ):
         if description is not None:
             self.description = description
+        self.headers = headers
 
     def __str__(self) -> str:
         return f"<{self.status_code} - {self.message}>: {self.description}"
@@ -30,7 +35,8 @@ class APIException(Exception):
 async def api_exception_handler(request: Request, exc: APIException) -> JSONResponse:  # noqa
     return JSONResponse(
         status_code=exc.status_code,
-        content=exc.details
+        content=exc.details,
+        headers=exc.headers
     )
 
 
@@ -46,6 +52,12 @@ async def db_exception_handler(request: Request, exc: SQLAlchemyError) -> JSONRe
 def init_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(APIException, api_exception_handler)  # noqa
     app.add_exception_handler(SQLAlchemyError, db_exception_handler)  # noqa
+
+
+class TooManyRequestsException(APIException):
+    status_code = HTTPStatus.TOO_MANY_REQUESTS.value
+    message = HTTPStatus.TOO_MANY_REQUESTS.phrase
+    description = HTTPStatus.TOO_MANY_REQUESTS.description
 
 
 class BadRequestException(APIException):
@@ -116,6 +128,10 @@ class BookingNotFound(NotFoundException):
 
 class BookingCancelNotAllowed(ForbiddenException):
     description = "Cancel booking is not allowed."
+
+
+class BookingConfirmNotAllowed(ForbiddenException):
+    description = "Confirm booking is not allowed."
 
 
 class HotelNotFound(NotFoundException):

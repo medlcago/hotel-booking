@@ -38,7 +38,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-      - ./prometheus/:/etc/prometheus/
+      - ./infra/prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
@@ -56,13 +56,13 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
     env_file:
-      - ./grafana/config.monitoring
+      - ./infra/grafana/config.monitoring
     restart: always
 
   nginx:
     container_name: nginx
     build:
-      context: ./nginx
+      context: ./infra/nginx
       dockerfile: ./Dockerfile
     ports:
       - "80:80"

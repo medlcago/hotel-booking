@@ -13,13 +13,12 @@ from utils.cache import init_cache
 
 class APIServer:
     def __init__(self):
+        self.container = Container()
         self.app = FastAPI(
             title="Hotel Booking API",
             lifespan=self.lifespan,
             debug=settings.debug
         )
-
-        self.container = Container()
         self.app.container = self.container
 
     @asynccontextmanager

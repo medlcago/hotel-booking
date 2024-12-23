@@ -1,7 +1,7 @@
 from typing import Literal
 
 from core.settings import settings
-from services.email import EmailService
+from services.impl.email_service import EmailService
 
 
 async def send_email(

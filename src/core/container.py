@@ -3,26 +3,25 @@ from dependency_injector import containers, providers
 from core.database import Database
 from core.settings import settings
 from core.uow import UnitOfWork
-from services.auth import AuthService
-from services.booking import BookingService
-from services.hotel import HotelService
-from services.review import ReviewService
-from services.room import RoomService
-from services.user import UserService
+from services.impl.auth_service import AuthService
+from services.impl.booking_service import BookingService
+from services.impl.email_service import EmailService
+from services.impl.hotel_service import HotelService
+from services.impl.review_service import ReviewService
+from services.impl.room_service import RoomService
+from services.impl.user_service import UserService
 from stores.redis import RedisStore
 
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
         modules=[
-            "api.v1.auth.auth",
-            "api.v1.users.users",
-            "api.v1.hotels.hotels",
-            "api.v1.rooms.rooms",
-            "api.v1.reviews.reviews",
-            "api.v1.bookings.bookings",
-            "api.deps",
             "utils.cache",
+        ],
+        packages=[
+            "middlewares",
+            "api",
+            "api.v1"
         ]
     )
 
@@ -74,4 +73,12 @@ class Container(containers.DeclarativeContainer):
     booking_service = providers.Factory(
         BookingService,
         uow=uow,
+    )
+
+    email_service = providers.Factory(
+        EmailService,
+        smtp_server=settings.smtp_server.host,
+        smtp_port=settings.smtp_server.port,
+        smtp_user=settings.smtp_server.username,
+        smtp_password=settings.smtp_server.password,
     )
