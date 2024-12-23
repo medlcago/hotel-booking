@@ -27,6 +27,14 @@ class Store(ABC):
     async def expires_in(self, key: str) -> int | None:
         raise NotImplementedError
 
+    @abstractmethod
+    async def incr(self, key: str, amount: int = 1) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def decr(self, key: str, amount: int = 1) -> None:
+        raise NotImplementedError
+
     async def __aenter__(self) -> Self:
         return self
 
@@ -37,3 +45,11 @@ class Store(ABC):
             exc_tb: TracebackType | None,
     ) -> None:
         pass
+
+
+class NamespacedStore(Store):
+    __slots__ = ("namespace",)
+
+    @abstractmethod
+    def with_namespace(self, namespace: str) -> Self:
+        raise NotImplementedError

@@ -1,13 +1,14 @@
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 
 from api import init_api_router
 from api.metrics import init_metrics
 from core.container import Container
 from core.exceptions import init_exception_handlers
 from core.settings import settings
+from middlewares.throttling import Throttling
 from utils.cache import init_cache
 
 
@@ -17,7 +18,15 @@ class APIServer:
         self.app = FastAPI(
             title="Hotel Booking API",
             lifespan=self.lifespan,
-            debug=settings.debug
+            debug=settings.debug,
+            dependencies=[
+                Depends(
+                    Throttling(
+                        limit=settings.default_throttle_limit,
+                        throttle_time=settings.default_throttle_time
+                    )
+                )
+            ]
         )
         self.app.container = self.container
 
