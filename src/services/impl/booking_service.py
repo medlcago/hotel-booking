@@ -9,7 +9,7 @@ from core.exceptions import (
     BookingConfirmNotAllowed
 )
 from core.uow import IUnitOfWork
-from enums.status import PaymentStatus
+from enums.status import BookingStatus
 from schemas.booking import (
     BookingCreateRequest,
     BookingResponse,
@@ -41,7 +41,7 @@ class BookingService(IBookingService):
                 raise RoomAlreadyBooked
 
             booking = await uow.booking_repository.create_booking(
-                values=dict(**schema.model_dump(), user_id=user_id, price_per_day=room.price_per_day)
+                values=dict(**schema.model_dump(), user_id=user_id)
             )
             return BookingCreateResponse.model_validate(booking, from_attributes=True)
 
@@ -50,25 +50,26 @@ class BookingService(IBookingService):
             booking = await uow.booking_repository.get_user_booking(booking_id=schema.booking_id, user_id=user_id)
             if not booking:
                 raise BookingNotFound
-            if booking.payment_status != PaymentStatus.pending or booking.date_to <= date.today():
+            if booking.status != BookingStatus.pending or booking.date_to <= date.today():
                 raise BookingCancelNotAllowed
             await uow.booking_repository.update_booking(
                 booking_id=schema.booking_id,
-                values=dict(payment_status=PaymentStatus.canceled)
+                values=dict(status=BookingStatus.canceled)
             )
 
-    async def confirm_booking(self, booking_id: int) -> None:
+    async def confirm_booking(self, booking_id: int, payment_id: str) -> None:
+        # TODO: add payment service
         async with self.uow as uow:
             booking = await uow.booking_repository.get_booking(booking_id=booking_id)
             if not booking:
                 raise BookingNotFound
-            if booking.payment_status != PaymentStatus.pending:
+            if booking.status != BookingStatus.pending:
                 raise BookingConfirmNotAllowed(
-                    f"Confirmation of booking is not allowed. Current status: {booking.payment_status}"
+                    f"Confirmation of booking is not allowed. Current status: {booking.status}"
                 )
             await uow.booking_repository.update_booking(
                 booking_id=booking_id,
-                values=dict(payment_status=PaymentStatus.paid)
+                values=dict(status=BookingStatus.confirmed)
             )
 
     async def get_user_bookings(self, user_id: int, params: BookingParams) -> PaginationResponse[BookingResponse]:

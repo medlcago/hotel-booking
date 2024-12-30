@@ -3,7 +3,7 @@ from typing import Any
 
 from sqlalchemy import select, func, insert, or_, and_, update
 
-from enums.status import PaymentStatus
+from enums.status import BookingStatus
 from models import Booking
 from repositories.base import Repository, Result
 from repositories.booking_repo import IBookingRepository
@@ -71,7 +71,7 @@ class BookingRepository(IBookingRepository, Repository[Booking]):
                         self.table.date_to > date_from,
                     ),
                 ),
-                Booking.payment_status.in_([PaymentStatus.pending, PaymentStatus.paid])
+                Booking.status.in_([BookingStatus.pending, BookingStatus.confirmed])
             )
         )
         return await self.session.scalar(booking_stmt)

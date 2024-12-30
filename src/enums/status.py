@@ -1,8 +1,7 @@
 from enum import StrEnum, auto
 
 
-class PaymentStatus(StrEnum):
+class BookingStatus(StrEnum):
     pending = auto()
-    paid = auto()
+    confirmed = auto()
     canceled = auto()
-    refund = auto()

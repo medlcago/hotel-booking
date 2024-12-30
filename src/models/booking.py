@@ -20,15 +20,18 @@ class Booking(Base, TimeStampMixin):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     date_from: Mapped[date]
     date_to: Mapped[date]
-    price_per_day: Mapped[Decimal]
-    payment_status: Mapped[str] = mapped_column(String(20), default="pending", server_default="pending")
+    status: Mapped[str] = mapped_column(String(20), default="pending", server_default="pending")
 
     user: Mapped[User] = relationship(back_populates="bookings")
-    room: Mapped[Room] = relationship(back_populates="bookings")
+    room: Mapped[Room] = relationship(back_populates="bookings", lazy="joined")
 
     @hybrid_property
     def total_days(self) -> int:
         return (self.date_to - self.date_from).days
+
+    @hybrid_property
+    def price_per_day(self) -> Decimal:
+        return self.room.price_per_day
 
     @hybrid_property
     def total_cost(self) -> Decimal:

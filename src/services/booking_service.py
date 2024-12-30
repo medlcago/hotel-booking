@@ -24,7 +24,7 @@ class IBookingService(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def confirm_booking(self, booking_id: int) -> None:
+    async def confirm_booking(self, booking_id: int, payment_id: str) -> None:
         raise NotImplementedError
 
     @abstractmethod

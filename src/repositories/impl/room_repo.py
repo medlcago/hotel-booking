@@ -4,7 +4,7 @@ from typing import Any
 from sqlalchemy import insert, select, func, or_, and_, update
 from sqlalchemy.exc import IntegrityError
 
-from enums.status import PaymentStatus
+from enums.status import BookingStatus
 from models import Room, Booking
 from repositories.base import Repository, Result, AlreadyExistsError
 from repositories.room_repo import IRoomRepository
@@ -54,7 +54,7 @@ class RoomRepository(IRoomRepository, Repository[Room]):
                         Booking.date_to > date_from,
                     ),
                 ),
-                Booking.payment_status.in_([PaymentStatus.pending, PaymentStatus.paid])
+                Booking.status.in_([BookingStatus.pending, BookingStatus.confirmed])
             )
         ).cte("booking_rooms")
 
