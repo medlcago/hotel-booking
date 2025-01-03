@@ -3,6 +3,7 @@ from typing import Any
 from sqlalchemy import insert, select, func, delete
 from sqlalchemy.exc import IntegrityError
 
+from core.db.session import get_session
 from models import Review
 from repositories.base import Repository, AlreadyExistsError, Result
 from repositories.review_repo import IReviewRepository
@@ -21,7 +22,8 @@ class ReviewRepository(IReviewRepository, Repository[Review]):
             returning(self.table)
         )
         try:
-            return await self.session.scalar(review_stmt)
+            async with get_session() as session:
+                return await session.scalar(review_stmt)
         except IntegrityError:
             raise AlreadyExistsError
 
@@ -47,24 +49,26 @@ class ReviewRepository(IReviewRepository, Repository[Review]):
             select(func.count(self.table.id)).
             filter_by(**kwargs)
         )
-
-        reviews = (await self.session.scalars(reviews_stmt)).all()
-        count = await self.session.scalar(count_stmt)
-        return Result(
-            count=count,
-            items=reviews,
-        )
+        async with get_session() as session:
+            reviews = (await session.scalars(reviews_stmt)).all()
+            count = await session.scalar(count_stmt)
+            return Result(
+                count=count,
+                items=reviews,
+            )
 
     async def get_user_review(self, review_id: int, user_id: int) -> Review | None:
         review_stmt = (
             select(self.table).
             filter_by(id=review_id, user_id=user_id)
         )
-        return await self.session.scalar(review_stmt)
+        async with get_session() as session:
+            return await session.scalar(review_stmt)
 
     async def delete_review(self, review_id: int, user_id: int) -> None:
         review_stmt = (
             delete(self.table).
             filter_by(id=review_id, user_id=user_id)
         )
-        await self.session.execute(review_stmt)
+        async with get_session() as session:
+            await session.execute(review_stmt)

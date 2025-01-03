@@ -4,6 +4,7 @@ from typing import Any
 from sqlalchemy import insert, select, func, or_, and_, update
 from sqlalchemy.exc import IntegrityError
 
+from core.db.session import get_session
 from enums.status import BookingStatus
 from models import Room, Booking
 from repositories.base import Repository, Result, AlreadyExistsError
@@ -22,7 +23,8 @@ class RoomRepository(IRoomRepository, Repository[Room]):
             returning(self.table)
         )
         try:
-            return await self.session.scalar(room_stmt)
+            async with get_session() as session:
+                return await session.scalar(room_stmt)
         except IntegrityError:
             raise AlreadyExistsError
 
@@ -31,7 +33,8 @@ class RoomRepository(IRoomRepository, Repository[Room]):
             select(self.table).
             filter_by(id=room_id)
         )
-        return await self.session.scalar(room_stmt)
+        async with get_session() as session:
+            return await session.scalar(room_stmt)
 
     async def get_rooms(
             self,
@@ -70,13 +73,13 @@ class RoomRepository(IRoomRepository, Repository[Room]):
             filter_by(**kwargs).
             filter(self.table.id.notin_(select(cte.c.room_id)))
         )
-
-        rooms = (await self.session.scalars(rooms_stmt)).all()
-        count = await self.session.scalar(count_stmt)
-        return Result(
-            count=count,
-            items=rooms,
-        )
+        async with get_session() as session:
+            rooms = (await session.scalars(rooms_stmt)).all()
+            count = await session.scalar(count_stmt)
+            return Result(
+                count=count,
+                items=rooms,
+            )
 
     async def update_room(self, room_id: int, values: dict[str, Any]) -> Room | None:
         room_stmt = (
@@ -85,4 +88,5 @@ class RoomRepository(IRoomRepository, Repository[Room]):
             values(**values).
             returning(self.table)
         )
-        return await self.session.scalar(room_stmt)
+        async with get_session() as session:
+            return await session.scalar(room_stmt)
