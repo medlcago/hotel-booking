@@ -1,11 +1,19 @@
+import os
 from datetime import timedelta
+from enum import StrEnum
+from functools import lru_cache
 from pathlib import Path, PurePath
 
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, SecretStr, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+
+class Mode(StrEnum):
+    DEV = "DEV"
+    PROD = "PROD"
 
 
 class Database(BaseModel):
@@ -21,14 +29,6 @@ class Database(BaseModel):
     pool_timeout: int = 10
     echo: bool = False
 
-    naming_convention: dict[str, str] = {
-        "ix": "ix_%(column_0_label)s",
-        "uq": "uq_%(table_name)s_%(column_0_N_name)s",
-        "ck": "ck_%(table_name)s_%(constraint_name)s",
-        "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-        "pk": "pk_%(table_name)s",
-    }
-
     @property
     def dsn(self) -> str:
         from sqlalchemy.engine.url import URL
@@ -43,7 +43,7 @@ class Database(BaseModel):
 
 
 class Redis(BaseModel):
-    url: str
+    url: RedisDsn
 
 
 class SmtpServer(BaseModel):
@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     templates: Jinja2Templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
     base_url: str
-    debug: bool
+    debug: bool = False
 
     access_token_lifetime: timedelta = timedelta(minutes=30)
     refresh_token_lifetime: timedelta = timedelta(days=1)
@@ -77,6 +77,10 @@ class Settings(BaseSettings):
 
     log_config: PurePath = BASE_DIR / "log_conf.yaml"
 
+
+class DevSettings(Settings):
+    debug: bool = True
+
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env.dev",
         env_nested_delimiter="__",
@@ -84,4 +88,12 @@ class Settings(BaseSettings):
     )
 
 
-settings = Settings()
+@lru_cache()
+def get_settings(mode: Mode | None = None) -> Settings:
+    mode = mode or os.getenv("MODE", Mode.DEV)
+    if mode == Mode.DEV:
+        return DevSettings()
+    return Settings()
+
+
+settings = get_settings()

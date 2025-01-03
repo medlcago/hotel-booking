@@ -1,8 +1,9 @@
 volumes:
-  postgres_data:
-  prometheus_data:
-  grafana_data:
-  redis_data:
+  dev_postgres_data:
+  dev_prometheus_data:
+  dev_grafana_data:
+  dev_redis_data:
+  dev_redis-insight:
 
 
 services:
@@ -24,13 +25,13 @@ services:
     image: postgres:latest
     restart: always
     env_file:
-      - .env
+      - .env.dev
     environment:
       POSTGRES_USER: ${DB__USER}
       POSTGRES_PASSWORD: ${DB__PASSWORD}
       POSTGRES_DB: ${DB__NAME}
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - dev_postgres_data:/var/lib/postgresql/data/
     ports:
       - "5434:5432"
 
@@ -39,7 +40,7 @@ services:
     container_name: prometheus
     volumes:
       - ./infra/prometheus/:/etc/prometheus/
-      - prometheus_data:/prometheus
+      - dev_prometheus_data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     ports:
@@ -54,7 +55,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - grafana_data:/var/lib/grafana
+      - dev_grafana_data:/var/lib/grafana
     env_file:
       - ./infra/grafana/config.monitoring
     restart: always
@@ -77,7 +78,16 @@ services:
     ports:
       - "6380:6379"
     volumes:
-      - redis_data:/data
+      - dev_redis_data:/data
+
+  redis-insight:
+    container_name: redis-ui
+    image: redis/redisinsight:latest
+    restart: always
+    ports:
+      - "5540:5540"
+    volumes:
+      - dev_redis-insight:/data
 
   celery_worker:
     container_name: celery_worker
