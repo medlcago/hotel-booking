@@ -9,6 +9,7 @@ from core.container import Container
 from core.exceptions import init_exception_handlers
 from core.settings import settings
 from middlewares.throttling import Throttling
+from middlewares import init_middlewares
 from utils.cache import init_cache
 
 
@@ -40,6 +41,7 @@ class APIServer:
         yield
 
     def _build_app(self) -> FastAPI:
+        init_middlewares(self.app)
         init_metrics(self.app)
         init_exception_handlers(self.app)
         init_api_router(self.app)

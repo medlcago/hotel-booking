@@ -3,6 +3,7 @@ from typing import Any
 
 from sqlalchemy import select, func, insert, or_, and_, update
 
+from core.db.session import get_session
 from enums.status import BookingStatus
 from models import Booking
 from repositories.base import Repository, Result
@@ -20,7 +21,8 @@ class BookingRepository(IBookingRepository, Repository[Booking]):
             values(**values).
             returning(self.table)
         )
-        return await self.session.scalar(booking_stmt)
+        async with get_session() as session:
+            return await session.scalar(booking_stmt)
 
     async def update_booking(self, booking_id: int, values: dict[str, Any]) -> Booking | None:
         booking_stmt = (
@@ -29,7 +31,8 @@ class BookingRepository(IBookingRepository, Repository[Booking]):
             values(**values).
             returning(self.table)
         )
-        return await self.session.scalar(booking_stmt)
+        async with get_session() as session:
+            return await session.scalar(booking_stmt)
 
     async def get_user_bookings(
             self,
@@ -48,13 +51,13 @@ class BookingRepository(IBookingRepository, Repository[Booking]):
             select(func.count(self.table.id)).
             filter_by(user_id=user_id, **kwargs)
         )
-
-        bookings = (await self.session.scalars(bookings_stmt)).all()
-        count = await self.session.scalar(count_stmt)
-        return Result(
-            count=count,
-            items=bookings
-        )
+        async with get_session() as session:
+            bookings = (await session.scalars(bookings_stmt)).all()
+            count = await session.scalar(count_stmt)
+            return Result(
+                count=count,
+                items=bookings
+            )
 
     async def get_room_booking(self, room_id: int, date_from: date, date_to: date) -> Booking | None:
         booking_stmt = (
@@ -74,18 +77,21 @@ class BookingRepository(IBookingRepository, Repository[Booking]):
                 Booking.status.in_([BookingStatus.pending, BookingStatus.confirmed])
             )
         )
-        return await self.session.scalar(booking_stmt)
+        async with get_session() as session:
+            return await session.scalar(booking_stmt)
 
     async def get_user_booking(self, booking_id: int, user_id: int) -> Booking | None:
         booking_stmt = (
             select(self.table).
             filter_by(id=booking_id, user_id=user_id)
         )
-        return await self.session.scalar(booking_stmt)
+        async with get_session() as session:
+            return await session.scalar(booking_stmt)
 
     async def get_booking(self, booking_id: int) -> Booking | None:
         booking_stmt = (
             select(self.table).
             filter_by(id=booking_id)
         )
-        return await self.session.scalar(booking_stmt)
+        async with get_session() as session:
+            return await session.scalar(booking_stmt)

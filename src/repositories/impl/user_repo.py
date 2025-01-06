@@ -3,6 +3,7 @@ from typing import Any
 from sqlalchemy import insert, select, func, update
 from sqlalchemy.exc import IntegrityError
 
+from core.db.session import get_session
 from models import User
 from repositories.base import Repository, AlreadyExistsError, Result
 from repositories.user_repo import IUserRepository
@@ -20,7 +21,8 @@ class UserRepository(IUserRepository, Repository[User]):
             returning(self.table)
         )
         try:
-            return await self.session.scalar(user_stmt)
+            async with get_session() as session:
+                return await session.scalar(user_stmt)
         except IntegrityError:
             raise AlreadyExistsError
 
@@ -29,14 +31,16 @@ class UserRepository(IUserRepository, Repository[User]):
             select(self.table).
             filter_by(id=user_id)
         )
-        return await self.session.scalar(user_stmt)
+        async with get_session() as session:
+            return await session.scalar(user_stmt)
 
     async def get_user_by_email(self, email: str) -> User | None:
         user_stmt = (
             select(self.table).
             filter_by(email=email)
         )
-        return await self.session.scalar(user_stmt)
+        async with get_session() as session:
+            return await session.scalar(user_stmt)
 
     async def get_users(self, limit: int, offset: int, **kwargs) -> Result[User]:
         users_stmt = (
@@ -50,12 +54,13 @@ class UserRepository(IUserRepository, Repository[User]):
             filter_by(**kwargs)
         )
 
-        users = (await self.session.scalars(users_stmt)).all()
-        count = await self.session.scalar(count_stmt)
-        return Result(
-            count=count,
-            items=users
-        )
+        async with get_session() as session:
+            users = (await session.scalars(users_stmt)).all()
+            count = await session.scalar(count_stmt)
+            return Result(
+                count=count,
+                items=users
+            )
 
     async def update_user(self, user_id: int, values: dict[str, Any]) -> User | None:
         user_stmt = (
@@ -64,4 +69,5 @@ class UserRepository(IUserRepository, Repository[User]):
             values(**values).
             returning(self.table)
         )
-        return await self.session.scalar(user_stmt)
+        async with get_session() as session:
+            return await session.scalar(user_stmt)
