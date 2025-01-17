@@ -6,6 +6,7 @@ from fastapi_cache.decorator import cache
 
 from api.deps import get_current_admin
 from core.container import Container
+from domain.services import IRoomService
 from schemas.response import PaginationResponse
 from schemas.room import (
     RoomResponse,
@@ -14,7 +15,6 @@ from schemas.room import (
     RoomParams,
     RoomUpdate
 )
-from services.room_service import IRoomService
 
 router = APIRouter(prefix="/rooms", tags=["rooms"])
 

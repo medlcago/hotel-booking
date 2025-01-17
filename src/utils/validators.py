@@ -15,7 +15,7 @@ def validate_phone(phone: str) -> str:
         raise ValueError("Invalid phone number format")
 
 
-PhoneType = Annotated[str, AfterValidator(validate_phone)]
+PhoneStr = Annotated[str, AfterValidator(validate_phone)]
 
 
 def validate_password(password: str) -> str:
@@ -32,4 +32,4 @@ def validate_password(password: str) -> str:
     return password
 
 
-PasswordType = Annotated[str, AfterValidator(validate_password)]
+PasswordStr = Annotated[str, AfterValidator(validate_password)]

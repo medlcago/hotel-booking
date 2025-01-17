@@ -2,7 +2,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-SortOrderType = Literal["asc", "desc"]
+SortOrder = Literal["asc", "desc"]
 
 
 class LimitOffset(BaseModel):
@@ -12,4 +12,4 @@ class LimitOffset(BaseModel):
 
 class OrderBy(BaseModel):
     field: str = "id"
-    sort_order: SortOrderType = "asc"
+    sort_order: SortOrder = "asc"

@@ -6,6 +6,7 @@ from fastapi_cache.decorator import cache
 
 from api.deps import get_current_admin
 from core.container import Container
+from domain.services import IHotelService
 from schemas.hotel import (
     HotelCreateRequest,
     HotelCreateResponse,
@@ -14,7 +15,6 @@ from schemas.hotel import (
     HotelUpdate
 )
 from schemas.response import PaginationResponse
-from services.hotel_service import IHotelService
 
 router = APIRouter(prefix="/hotels", tags=["hotels"])
 

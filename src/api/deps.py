@@ -11,9 +11,9 @@ from core.exceptions import (
     UserNotVerified
 )
 from core.security import AccessTokenBearer, RefreshTokenBearer
+from domain.services import IUserService
 from schemas.token import TokenResult
 from schemas.user import UserResponse
-from services.user_service import IUserService
 
 access_token_bearer = AccessTokenBearer()
 refresh_token_bearer = RefreshTokenBearer()

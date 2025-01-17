@@ -6,6 +6,7 @@ from fastapi_cache.decorator import cache
 
 from api.deps import CurrentActiveUser, CurrentVerifiedUser
 from core.container import Container
+from domain.services import IBookingService
 from schemas.booking import (
     BookingCreateRequest,
     BookingCreateResponse,
@@ -14,7 +15,6 @@ from schemas.booking import (
     BookingCancelRequest
 )
 from schemas.response import PaginationResponse
-from services.booking_service import IBookingService
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 

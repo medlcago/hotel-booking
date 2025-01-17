@@ -1,18 +1,18 @@
 from dependency_injector import containers, providers
 
 from core.settings import settings
-from repositories.impl.booking_repo import BookingRepository
-from repositories.impl.hotel_repo import HotelRepository
-from repositories.impl.review_repo import ReviewRepository
-from repositories.impl.room_repo import RoomRepository
-from repositories.impl.user_repo import UserRepository
-from services.impl.auth_service import AuthService
-from services.impl.booking_service import BookingService
-from services.impl.email_service import EmailService
-from services.impl.hotel_service import HotelService
-from services.impl.review_service import ReviewService
-from services.impl.room_service import RoomService
-from services.impl.user_service import UserService
+from repositories.booking import BookingRepository
+from repositories.hotel import HotelRepository
+from repositories.review import ReviewRepository
+from repositories.room import RoomRepository
+from repositories.user import UserRepository
+from services.auth import AuthService
+from services.booking import BookingService
+from services.email import EmailService
+from services.hotel import HotelService
+from services.review import ReviewService
+from services.room import RoomService
+from services.user import UserService
 from stores.redis import RedisStore
 
 

@@ -8,6 +8,7 @@ from fastapi.requests import Request
 from core.container import Container
 from core.exceptions import TooManyRequestsException
 from stores.base import NamespacedStore
+from utils.ip_address import extract_ip_address
 
 logger = logging.getLogger("hotel_booking")
 
@@ -19,12 +20,7 @@ class ThrottlingMiddlewareBase(ABC):
 
     @staticmethod
     def make_key(request: Request) -> str:
-        user_ip = (
-                request.headers.get("X-Forwarded-For") or
-                request.headers.get("X-Real-Ip") or
-                request.headers.get("REMOTE_ADDR") or
-                request.client.host
-        )
+        user_ip = extract_ip_address(request)
         user_agent = request.headers.get("User-Agent")
         logger.info(f"user_ip: {user_ip}, user_agent: {user_agent}")
         return f"{user_ip}:{user_agent}"

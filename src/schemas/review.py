@@ -3,13 +3,13 @@ from typing import Annotated
 
 from pydantic import BaseModel, PositiveInt, Field
 
-from schemas.filters import LimitOffset, OrderBy, SortOrderType
+from schemas.filters import LimitOffset, OrderBy, SortOrder
 
 
 class ReviewParams(LimitOffset, OrderBy):
     hotel_id: Annotated[PositiveInt | None, Field(description="Сортировка по отелю")] = None
     field: str = "created_at"
-    sort_order: SortOrderType = "desc"
+    sort_order: SortOrder = "desc"
 
 
 class ReviewCreateRequest(BaseModel):

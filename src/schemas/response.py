@@ -1,13 +1,15 @@
-from typing import Generic, TypeVar
+from typing import Sequence
 
-from pydantic import BaseModel
-
-ModelType = TypeVar("ModelType", bound=BaseModel)
+from pydantic import BaseModel, ConfigDict
 
 
-class PaginationResponse(BaseModel, Generic[ModelType]):
+class PaginationResponse[T](BaseModel):
     count: int
-    items: list[ModelType]
+    items: Sequence[T]
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True
+    )
 
 
 class Message(BaseModel):

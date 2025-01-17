@@ -4,7 +4,7 @@ from typing import Annotated
 from pydantic import BaseModel, Field, EmailStr
 
 from schemas.filters import LimitOffset
-from utils.validators import PasswordType
+from utils.validators import PasswordStr
 
 
 class UserParams(LimitOffset):
@@ -32,4 +32,4 @@ class PasswordResetRequest(BaseModel):
 
 class PasswordResetConfirm(BaseModel):
     token: str
-    new_password: PasswordType
+    new_password: PasswordStr

@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, status
 
 from api.deps import CurrentUser, RefreshTokenResult
 from core.container import Container
+from domain.services import IAuthService
 from schemas.auth import (
     SignUpRequest,
     SignInRequest,
@@ -10,7 +11,6 @@ from schemas.auth import (
 from schemas.response import Message
 from schemas.token import Token
 from schemas.user import UserResponse
-from services.auth_service import IAuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -91,10 +91,10 @@ async def sign_in(
 )
 @inject
 async def refresh_token(
-        result: RefreshTokenResult,
+        token: RefreshTokenResult,
         auth_service: IAuthService = Depends(Provide[Container.auth_service])
 ):
-    return await auth_service.refresh_token(result=result)
+    return await auth_service.refresh_token(token=token)
 
 
 @router.post(
@@ -114,7 +114,7 @@ async def refresh_token(
 )
 @inject
 async def logout(
-        result: RefreshTokenResult,
+        token: RefreshTokenResult,
         auth_service: IAuthService = Depends(Provide[Container.auth_service])
 ):
-    await auth_service.revoke_token(result=result)
+    await auth_service.revoke_token(token=token)

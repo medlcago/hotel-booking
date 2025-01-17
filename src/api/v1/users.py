@@ -5,6 +5,7 @@ from fastapi import APIRouter, status, Depends, Query
 
 from api.deps import CurrentActiveUser, get_current_admin
 from core.container import Container
+from domain.services import IUserService
 from schemas.response import Message
 from schemas.response import PaginationResponse
 from schemas.user import (
@@ -13,7 +14,6 @@ from schemas.user import (
     PasswordResetRequest,
     PasswordResetConfirm
 )
-from services.user_service import IUserService
 
 router = APIRouter(prefix="/users", tags=["users"])
 

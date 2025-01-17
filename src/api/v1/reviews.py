@@ -8,7 +8,7 @@ from api.deps import CurrentActiveUser, CurrentVerifiedUser
 from core.container import Container
 from schemas.response import PaginationResponse
 from schemas.review import ReviewCreateRequest, ReviewCreateResponse, ReviewResponse, ReviewParams
-from services.review_service import IReviewService
+from domain.services.review import IReviewService
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
