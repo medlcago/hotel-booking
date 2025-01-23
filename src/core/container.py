@@ -14,6 +14,7 @@ from services.review import ReviewService
 from services.room import RoomService
 from services.user import UserService
 from stores.redis import RedisStore
+from utils.celery_utils import create_celery
 
 
 class RepositoriesContainer(containers.DeclarativeContainer):
@@ -28,6 +29,7 @@ class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
         modules=[
             "utils.cache",
+            "utils.mail",
         ],
         packages=[
             "middlewares",
@@ -38,6 +40,15 @@ class Container(containers.DeclarativeContainer):
 
     repositories = providers.Container(RepositoriesContainer)
 
+    celery_app = providers.Singleton(
+        create_celery,
+        broker_url=settings.celery.broker_url,
+        backend_url=settings.celery.backend_url,
+        timezone="UTC",
+        enable_utc=True,
+        broker_connection_retry_on_startup=True
+    )
+
     redis_store = providers.Singleton(
         RedisStore.with_client,
         url=str(settings.redis.url)
@@ -46,6 +57,7 @@ class Container(containers.DeclarativeContainer):
     user_service = providers.Factory(
         UserService,
         user_repository=repositories.user_repository,
+        celery=celery_app
     )
 
     hotel_service = providers.Factory(
@@ -62,6 +74,7 @@ class Container(containers.DeclarativeContainer):
         AuthService,
         user_repository=repositories.user_repository,
         store=redis_store,
+        celery=celery_app
     )
 
     review_service = providers.Factory(
@@ -75,7 +88,7 @@ class Container(containers.DeclarativeContainer):
         booking_repository=repositories.booking_repository,
     )
 
-    email_service = providers.Factory(
+    email_service = providers.Singleton(
         EmailService,
         smtp_server=settings.smtp_server.host,
         smtp_port=settings.smtp_server.port,

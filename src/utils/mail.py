@@ -1,21 +1,19 @@
 from typing import Literal
 
-from core.settings import settings
-from services.email import EmailService
+from dependency_injector.wiring import Provide, inject
+
+from core.container import Container
+from domain.services import IEmailService
 
 
+@inject
 async def send_email(
         subject: str,
         recipients: list[str],
         body: str,
-        content_type: Literal["html", "plain"]
+        content_type: Literal["html", "plain"],
+        email_service: IEmailService = Provide[Container.email_service]
 ) -> None:
-    email_service = EmailService(
-        smtp_server=settings.smtp_server.host,
-        smtp_port=settings.smtp_server.port,
-        smtp_user=settings.smtp_server.username,
-        smtp_password=settings.smtp_server.password,
-    )
     await email_service.send_email(
         subject=subject,
         recipients=recipients,

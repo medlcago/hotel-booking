@@ -8,8 +8,8 @@ from api.metrics import init_metrics
 from core.container import Container
 from core.exceptions import init_exception_handlers
 from core.settings import settings
-from middlewares.throttling import Throttling
 from middlewares import init_middlewares
+from middlewares.throttling import Throttling
 from utils.cache import init_cache
 
 

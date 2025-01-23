@@ -1,20 +1,19 @@
 from asgiref.sync import async_to_sync
 from celery import Celery
 
+from core.container import Container
 from core.settings import settings
 from utils.mail import send_email
 from utils.template import render_template
 
-celery = Celery(
-    __name__,
-    broker=settings.celery.broker_url,
-    backend=settings.celery.backend_url
-)
-celery.conf.update(
-    timezone="UTC",
-    enable_utc=True,
-    broker_connection_retry_on_startup=True
-)
+
+def create_celery_app() -> Celery:
+    container: Container = Container()
+    _celery_app = container.celery_app()
+    return _celery_app
+
+
+celery = create_celery_app()
 
 
 @celery.task(name="send_confirmation_email", ingore_result=True)

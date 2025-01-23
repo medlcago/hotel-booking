@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from celery import Celery
+
 from core import security
 from core.db.transactional import Transactional
 from core.exceptions import (
@@ -16,7 +18,6 @@ from schemas.user import (
     PasswordResetRequest,
     PasswordResetConfirm
 )
-from tasks import send_reset_password_email
 
 __all__ = ("UserService",)
 
@@ -24,6 +25,7 @@ __all__ = ("UserService",)
 @dataclass(frozen=True, slots=True)
 class UserService(IUserService):
     user_repository: IUserRepository
+    celery: Celery
 
     async def get_user_by_email(self, email: str) -> UserResponse:
         user = await self.user_repository.get_user_by_email(email=email)
@@ -49,7 +51,7 @@ class UserService(IUserService):
         if not user:
             raise UserNotFound
         token = security.create_url_safe_token(data=dict(email=schema.email, action="reset_password"))
-        send_reset_password_email.delay(email=schema.email, token=token)
+        self.celery.send_task(name="send_reset_password_email", args=(schema.email, token))
         return Message(
             message="An email has been sent to your email address to reset your password!",
         )

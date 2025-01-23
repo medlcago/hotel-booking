@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from celery import Celery
 from core import security
 from core.db.transactional import Transactional
 from core.exceptions import (
@@ -19,7 +20,6 @@ from schemas.response import Message
 from schemas.token import Token, TokenResult
 from schemas.user import UserResponse
 from stores.base import Store
-from tasks import send_confirmation_email
 
 __all__ = ("AuthService",)
 
@@ -28,6 +28,7 @@ __all__ = ("AuthService",)
 class AuthService(IAuthService):
     user_repository: IUserRepository
     store: Store
+    celery: Celery
 
     @Transactional()
     async def sign_up(self, schema: SignUpRequest) -> UserResponse:
@@ -38,7 +39,7 @@ class AuthService(IAuthService):
         schema.password = security.hash_password(schema.password)
         user = await self.user_repository.create_user(values=schema.model_dump())
         token = security.create_url_safe_token(data=dict(email=schema.email, action="confirm_email"))
-        send_confirmation_email.delay(email=schema.email, token=token)
+        self.celery.send_task(name="send_confirmation_email", args=(schema.email, token))
         return UserResponse.model_validate(user, from_attributes=True)
 
     async def sign_in(self, schema: SignInRequest) -> Token:
@@ -89,7 +90,7 @@ class AuthService(IAuthService):
         if user.is_verified:
             raise UserAlreadyVerified
         token = security.create_url_safe_token(data=dict(email=email, action="confirm_email"))
-        send_confirmation_email.delay(email=email, token=token)
+        self.celery.send_task(name="send_confirmation_email", args=(email, token))
         return Message(
             message="E-mail successfully sent!"
         )
