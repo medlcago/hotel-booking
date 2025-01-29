@@ -53,3 +53,7 @@ class BookingUseCase(IBookingUseCase):
 
     async def get_booking(self, booking_id: int) -> BookingResponse:
         return await self.booking_service.get_booking(booking_id=booking_id)
+
+    @Transactional()
+    async def cancel_pending_booking(self, booking_id: int) -> None:
+        return await self.booking_service.cancel_pending_booking(booking_id=booking_id)

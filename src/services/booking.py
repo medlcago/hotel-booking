@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
+
+from celery import Celery
 
 from core.exceptions import (
     RoomNotFound,
@@ -26,6 +28,7 @@ __all__ = ("BookingService",)
 class BookingService(IBookingService):
     room_repository: IRoomRepository
     booking_repository: IBookingRepository
+    celery: Celery
 
     async def create_booking(self, schema: BookingCreateRequest, user_id: int) -> BookingCreateResponse:
         room = await self.room_repository.get_room_by_id(room_id=schema.room_id)
@@ -46,6 +49,11 @@ class BookingService(IBookingService):
                 date_from=schema.date_from,
                 date_to=schema.date_to
             )
+        )
+        self.celery.send_task(
+            name="cancel_pending_booking",
+            args=(booking.id,),
+            countdown=timedelta(minutes=15).seconds
         )
         return BookingCreateResponse.model_validate(booking, from_attributes=True)
 
@@ -93,3 +101,11 @@ class BookingService(IBookingService):
         if not booking:
             raise BookingNotFound
         return BookingResponse.model_validate(booking, from_attributes=True)
+
+    async def cancel_pending_booking(self, booking_id: int) -> None:
+        booking = await self.get_booking(booking_id=booking_id)
+        if booking.status == Status.pending:
+            await self.booking_repository.update_status(
+                booking_id=booking_id,
+                status=Status.canceled
+            )

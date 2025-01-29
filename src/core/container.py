@@ -124,6 +124,7 @@ class Container(containers.DeclarativeContainer):
         BookingService,
         room_repository=room_repository,
         booking_repository=booking_repository,
+        celery=celery_app
     )
 
     email_service = providers.Singleton(
