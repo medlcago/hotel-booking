@@ -1,14 +1,22 @@
+import platform
+import uuid
+
 from asgiref.sync import async_to_sync
 from celery import Celery
 
 from core.container import Container
+from core.db.scope import session_scope
 from core.settings import settings
+from utils.booking import cancel_pending_booking
+from utils.db_session import init_db_session
 from utils.mail import send_email
 from utils.template import render_template
 
 
 def create_celery_app() -> Celery:
     container: Container = Container()
+    _db_engine = container.db_engine()
+    init_db_session(_db_engine)
     _celery_app = container.celery_app()
     return _celery_app
 
@@ -40,6 +48,25 @@ def send_reset_password_email(email: str, token: str) -> None:
     )
 
 
+@celery.task(
+    name="cancel_pending_booking",
+    autoretry_for=(Exception,),
+    retry_backoff=True
+)
+def cancel_pending_booking_task(booking_id: int) -> None:
+    async def async_wrapper():
+        session_id = uuid.uuid4()
+        async with session_scope(session_id):
+            await cancel_pending_booking(
+                booking_id=booking_id,
+            )
+
+    async_to_sync(async_wrapper)()
+
+
 if __name__ == "__main__":
     args = ["worker", "--loglevel=INFO"]
+    os_name = platform.system()
+    if os_name == "Windows":
+        args.append("--pool=solo")
     celery.worker_main(argv=args)

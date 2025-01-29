@@ -37,3 +37,7 @@ class IBookingService(ABC):
     @abstractmethod
     async def get_booking(self, booking_id: int) -> BookingResponse:
         raise NotImplementedError
+
+    @abstractmethod
+    async def cancel_pending_booking(self, booking_id: int) -> None:
+        raise NotImplementedError
