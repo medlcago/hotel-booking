@@ -10,12 +10,11 @@ if TYPE_CHECKING:
     )
     from schemas.response import Message
     from schemas.token import Token, TokenResult
-    from schemas.user import UserResponse
 
 
 class IAuthService(ABC):
     @abstractmethod
-    async def sign_up(self, schema: SignUpRequest) -> UserResponse:
+    async def sign_up(self, schema: SignUpRequest) -> Token:
         raise NotImplementedError
 
     @abstractmethod

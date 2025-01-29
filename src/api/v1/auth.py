@@ -10,7 +10,6 @@ from schemas.auth import (
 )
 from schemas.response import Message
 from schemas.token import Token
-from schemas.user import UserResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -41,7 +40,7 @@ async def confirm_email(
 
 @router.post(
     path="/sign-up",
-    response_model=UserResponse,
+    response_model=Token,
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_409_CONFLICT: {

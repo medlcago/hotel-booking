@@ -18,7 +18,6 @@ from schemas.auth import SignInRequest
 from schemas.auth import SignUpRequest
 from schemas.response import Message
 from schemas.token import Token, TokenResult
-from schemas.user import UserResponse
 from stores.base import Store
 
 __all__ = ("AuthService",)
@@ -30,7 +29,7 @@ class AuthService(IAuthService):
     store: Store
     celery: Celery
 
-    async def sign_up(self, schema: SignUpRequest) -> UserResponse:
+    async def sign_up(self, schema: SignUpRequest) -> Token:
         user = await self.user_repository.get_user_by_email(email=str(schema.email))
         if user:
             raise UserAlreadyExists
@@ -39,7 +38,7 @@ class AuthService(IAuthService):
         user = await self.user_repository.create_user(values=schema.model_dump())
         token = security.create_url_safe_token(data=dict(email=schema.email, action="confirm_email"))
         self.celery.send_task(name="send_confirmation_email", args=(schema.email, token))
-        return UserResponse.model_validate(user, from_attributes=True)
+        return self.get_token(user_id=user.id)
 
     async def sign_in(self, schema: SignInRequest) -> Token:
         user = await self.user_repository.get_user_by_email(email=str(schema.email))
