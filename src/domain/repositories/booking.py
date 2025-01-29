@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from datetime import date
     from domain.entities import Booking
     from schemas.response import PaginationResponse
+    from enums.status import Status
 
 
 class IBookingRepository(ABC):
@@ -15,7 +16,7 @@ class IBookingRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def update_booking(self, booking_id: int, values: dict[str, Any]) -> Booking | None:
+    async def update_status(self, booking_id: int, status: Status) -> Booking | None:
         raise NotImplementedError
 
     @abstractmethod

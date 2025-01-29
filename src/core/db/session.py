@@ -1,54 +1,48 @@
-from contextlib import asynccontextmanager
-from contextvars import ContextVar, Token
-from typing import AsyncGenerator
+from typing import ClassVar
 
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, async_scoped_session, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, async_scoped_session, AsyncSession
 
-from core.settings import settings
-
-session_context: ContextVar[str] = ContextVar("session_context")
+from core.db.context import SessionContext
 
 
-def get_session_context() -> str:
-    return session_context.get()
+class Session:
+    _async_session_factory: ClassVar[async_sessionmaker[AsyncSession] | None] = None
+    _scoped_session: ClassVar[async_scoped_session[AsyncSession] | None] = None
+    _init: ClassVar[bool] = False
 
+    @classmethod
+    def initialize(cls, engine: AsyncEngine) -> None:
+        cls._async_session_factory = async_sessionmaker(
+            bind=engine,
+            expire_on_commit=False,
+            autoflush=False,
+        )
+        cls._scoped_session = async_scoped_session(
+            cls._async_session_factory,
+            scopefunc=SessionContext.get_session_context
+        )
+        cls._init = True
 
-def set_session_context(session_id: str) -> Token:
-    return session_context.set(session_id)
+    @classmethod
+    def get_session(cls) -> AsyncSession:
+        if not cls._init:
+            raise RuntimeError("session is not initialized. Please call Session.initialize()")
+        return cls._scoped_session()
 
+    @classmethod
+    async def remove(cls) -> None:
+        if not cls._init:
+            raise RuntimeError("session is not initialized. Please call Session.initialize()")
+        await cls._scoped_session.remove()
 
-def reset_session_context(context: Token) -> None:
-    session_context.reset(context)
+    @classmethod
+    async def commit(cls):
+        if not cls._init:
+            raise RuntimeError("session is not initialized. Please call Session.initialize()")
+        await cls._scoped_session.commit()
 
-
-engine = create_async_engine(
-    url=settings.db.dsn,
-    echo=settings.db.echo,
-    pool_size=settings.db.pool_size,
-    max_overflow=settings.db.max_overflow,
-    pool_timeout=settings.db.pool_timeout
-)
-
-_async_session_factory = async_sessionmaker(
-    bind=engine,
-    expire_on_commit=False,
-    autoflush=False,
-)
-
-session = async_scoped_session(
-    _async_session_factory,
-    scopefunc=get_session_context
-)
-
-
-@asynccontextmanager
-async def session_scope(session_id: str):
-    token = set_session_context(session_id)
-    yield
-    await session.remove()
-    reset_session_context(token)
-
-
-@asynccontextmanager
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
-    yield session()
+    @classmethod
+    async def rollback(cls):
+        if not cls._init:
+            raise RuntimeError("session is not initialized. Please call Session.initialize()")
+        await cls._scoped_session.rollback()

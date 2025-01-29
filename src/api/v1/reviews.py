@@ -6,9 +6,9 @@ from fastapi_cache.decorator import cache
 
 from api.deps import CurrentActiveUser, CurrentVerifiedUser
 from core.container import Container
+from domain.usecases import IReviewUseCase
 from schemas.response import PaginationResponse
 from schemas.review import ReviewCreateRequest, ReviewCreateResponse, ReviewResponse, ReviewParams
-from domain.services.review import IReviewService
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
@@ -34,9 +34,9 @@ router = APIRouter(prefix="/reviews", tags=["reviews"])
 async def add_review(
         schema: ReviewCreateRequest,
         user: CurrentVerifiedUser,
-        review_service: IReviewService = Depends(Provide[Container.review_service])
+        review_use_case: IReviewUseCase = Depends(Provide[Container.review_use_case])
 ):
-    return await review_service.add_review(schema=schema, user_id=user.id)
+    return await review_use_case.add_review(schema=schema, user_id=user.id)
 
 
 @router.get(
@@ -47,9 +47,9 @@ async def add_review(
 @inject
 async def get_reviews(
         params: Annotated[ReviewParams, Query()],
-        review_service: IReviewService = Depends(Provide[Container.review_service])
+        review_use_case: IReviewUseCase = Depends(Provide[Container.review_use_case])
 ):
-    return await review_service.get_reviews(params=params)
+    return await review_use_case.get_reviews(params=params)
 
 
 @router.delete(
@@ -65,6 +65,6 @@ async def get_reviews(
 async def delete_review(
         review_id: int,
         user: CurrentActiveUser,
-        review_service: IReviewService = Depends(Provide[Container.review_service])
+        review_use_case: IReviewUseCase = Depends(Provide[Container.review_use_case])
 ):
-    await review_service.delete_review(review_id=review_id, user_id=user.id)
+    await review_use_case.delete_review(review_id=review_id, user_id=user.id)

@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
 from celery import Celery
+
 from core import security
-from core.db.transactional import Transactional
 from core.exceptions import (
     UserAlreadyExists,
     BadCredentials,
@@ -30,7 +30,6 @@ class AuthService(IAuthService):
     store: Store
     celery: Celery
 
-    @Transactional()
     async def sign_up(self, schema: SignUpRequest) -> UserResponse:
         user = await self.user_repository.get_user_by_email(email=str(schema.email))
         if user:
@@ -50,9 +49,7 @@ class AuthService(IAuthService):
             raise BadCredentials
         if not user.is_active:
             raise UserInactive
-        return self.get_token(
-            user_id=user.id
-        )
+        return self.get_token(user_id=user.id)
 
     @staticmethod
     def get_token(user_id: int) -> Token:
@@ -67,7 +64,6 @@ class AuthService(IAuthService):
         await self.revoke_token(token=token)
         return self.get_token(user_id=token.user_id)
 
-    @Transactional()
     async def confirm_email(self, token: str) -> Message:
         payload = security.decode_url_safe_token(token=token, max_age=86400)
         if not payload:

@@ -6,7 +6,7 @@ from fastapi_cache.decorator import cache
 
 from api.deps import CurrentActiveUser, CurrentVerifiedUser
 from core.container import Container
-from domain.services import IBookingService
+from domain.usecases import IBookingUseCase
 from schemas.booking import (
     BookingCreateRequest,
     BookingCreateResponse,
@@ -36,9 +36,9 @@ router = APIRouter(prefix="/bookings", tags=["bookings"])
 async def create_booking(
         user: CurrentVerifiedUser,
         schema: BookingCreateRequest,
-        booking_service: IBookingService = Depends(Provide[Container.booking_service])
+        booking_use_case: IBookingUseCase = Depends(Provide[Container.booking_use_case])
 ):
-    return await booking_service.create_booking(schema=schema, user_id=user.id)
+    return await booking_use_case.create_booking(schema=schema, user_id=user.id)
 
 
 @router.post(
@@ -57,9 +57,9 @@ async def create_booking(
 async def cancel_booking(
         user: CurrentActiveUser,
         schema: BookingCancelRequest,
-        booking_service: IBookingService = Depends(Provide[Container.booking_service])
+        booking_use_case: IBookingUseCase = Depends(Provide[Container.booking_use_case])
 ):
-    await booking_service.cancel_booking(schema=schema, user_id=user.id)
+    await booking_use_case.cancel_booking(schema=schema, user_id=user.id)
 
 
 @router.get(
@@ -76,9 +76,9 @@ async def cancel_booking(
 async def get_user_booking(
         user: CurrentActiveUser,
         booking_id: int,
-        booking_service: IBookingService = Depends(Provide[Container.booking_service])
+        booking_use_case: IBookingUseCase = Depends(Provide[Container.booking_use_case])
 ):
-    return await booking_service.get_user_booking(booking_id=booking_id, user_id=user.id)
+    return await booking_use_case.get_user_booking(booking_id=booking_id, user_id=user.id)
 
 
 @router.get(
@@ -90,6 +90,6 @@ async def get_user_booking(
 async def get_user_bookings(
         user: CurrentActiveUser,
         params: Annotated[BookingParams, Query()],
-        booking_service: IBookingService = Depends(Provide[Container.booking_service])
+        booking_use_case: IBookingUseCase = Depends(Provide[Container.booking_use_case])
 ):
-    return await booking_service.get_user_bookings(user_id=user.id, params=params)
+    return await booking_use_case.get_user_bookings(user_id=user.id, params=params)

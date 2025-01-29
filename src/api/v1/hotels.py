@@ -6,7 +6,7 @@ from fastapi_cache.decorator import cache
 
 from api.deps import get_current_admin
 from core.container import Container
-from domain.services import IHotelService
+from domain.usecases import IHotelUseCase
 from schemas.hotel import (
     HotelCreateRequest,
     HotelCreateResponse,
@@ -33,9 +33,9 @@ router = APIRouter(prefix="/hotels", tags=["hotels"])
 @inject
 async def add_hotel(
         schema: HotelCreateRequest,
-        hotel_service: IHotelService = Depends(Provide[Container.hotel_service])
+        hotel_use_case: IHotelUseCase = Depends(Provide[Container.hotel_use_case])
 ):
-    return await hotel_service.add_hotel(schema=schema)
+    return await hotel_use_case.add_hotel(schema=schema)
 
 
 @router.get(
@@ -51,9 +51,9 @@ async def add_hotel(
 @inject
 async def get_hotel_by_id(
         hotel_id: int,
-        hotel_service: IHotelService = Depends(Provide[Container.hotel_service])
+        hotel_use_case: IHotelUseCase = Depends(Provide[Container.hotel_use_case])
 ):
-    return await hotel_service.get_hotel_by_id(hotel_id=hotel_id)
+    return await hotel_use_case.get_hotel_by_id(hotel_id=hotel_id)
 
 
 @router.get(
@@ -64,9 +64,9 @@ async def get_hotel_by_id(
 @inject
 async def get_hotels(
         params: Annotated[HotelParams, Query()],
-        hotel_service: IHotelService = Depends(Provide[Container.hotel_service])
+        hotel_use_case: IHotelUseCase = Depends(Provide[Container.hotel_use_case])
 ):
-    return await hotel_service.get_hotels(params=params)
+    return await hotel_use_case.get_hotels(params=params)
 
 
 @router.patch(
@@ -83,6 +83,6 @@ async def get_hotels(
 async def update_hotel(
         hotel_id: int,
         schema: HotelUpdate,
-        hotel_service: IHotelService = Depends(Provide[Container.hotel_service])
+        hotel_use_case: IHotelUseCase = Depends(Provide[Container.hotel_use_case])
 ):
-    return await hotel_service.update_hotel(hotel_id=hotel_id, schema=schema)
+    return await hotel_use_case.update_hotel(hotel_id=hotel_id, schema=schema)

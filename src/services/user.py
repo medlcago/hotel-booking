@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from celery import Celery
 
 from core import security
-from core.db.transactional import Transactional
 from core.exceptions import (
     TokenExpired,
     UserNotFound
@@ -56,7 +55,6 @@ class UserService(IUserService):
             message="An email has been sent to your email address to reset your password!",
         )
 
-    @Transactional()
     async def confirm_reset_password(self, schema: PasswordResetConfirm) -> Message:
         payload = security.decode_url_safe_token(token=schema.token, max_age=300)
         if not payload:

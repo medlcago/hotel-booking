@@ -3,11 +3,10 @@ from typing import Any
 
 from sqlalchemy import insert, select, func, or_, and_, update
 
-from core.db.session import get_session
 from domain.entities import Room, Booking
 from domain.repositories import IRoomRepository
 from domain.repositories.base import Repository
-from enums.status import BookingStatus
+from enums.status import Status
 from schemas.response import PaginationResponse
 
 __all__ = ("RoomRepository",)
@@ -22,16 +21,14 @@ class RoomRepository(IRoomRepository, Repository[Room]):
             values(**values).
             returning(self.table)
         )
-        async with get_session() as session:
-            return await session.scalar(room_stmt)
+        return await self.session.scalar(room_stmt)
 
     async def get_room_by_id(self, room_id: int) -> Room | None:
         room_stmt = (
             select(self.table).
             filter_by(id=room_id)
         )
-        async with get_session() as session:
-            return await session.scalar(room_stmt)
+        return await self.session.scalar(room_stmt)
 
     async def get_rooms(
             self,
@@ -54,7 +51,7 @@ class RoomRepository(IRoomRepository, Repository[Room]):
                         Booking.date_to > date_from,
                     ),
                 ),
-                Booking.status.in_([BookingStatus.pending, BookingStatus.confirmed])
+                Booking.status.in_([Status.pending, Status.succeeded])
             )
         ).cte("booking_rooms")
 
@@ -70,13 +67,12 @@ class RoomRepository(IRoomRepository, Repository[Room]):
             filter_by(**kwargs).
             filter(self.table.id.notin_(select(cte.c.room_id)))
         )
-        async with get_session() as session:
-            rooms = (await session.scalars(rooms_stmt)).all()
-            count = await session.scalar(count_stmt)
-            return PaginationResponse(
-                count=count,
-                items=rooms,
-            )
+        rooms = (await self.session.scalars(rooms_stmt)).all()
+        count = await self.session.scalar(count_stmt)
+        return PaginationResponse(
+            count=count,
+            items=rooms,
+        )
 
     async def update_room(self, room_id: int, values: dict[str, Any]) -> Room | None:
         room_stmt = (
@@ -85,5 +81,4 @@ class RoomRepository(IRoomRepository, Repository[Room]):
             values(**values).
             returning(self.table)
         )
-        async with get_session() as session:
-            return await session.scalar(room_stmt)
+        return await self.session.scalar(room_stmt)

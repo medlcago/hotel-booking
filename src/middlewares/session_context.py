@@ -4,7 +4,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import Response
 
-from core.db.session import session_scope
+from core.db.scope import session_scope
 
 
 class SessionContextMiddleware(BaseHTTPMiddleware):

@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-from core.db.transactional import Transactional
 from core.exceptions import HotelNotFound
 from domain.repositories import IHotelRepository
 from domain.services import IHotelService
@@ -20,7 +19,6 @@ __all__ = ("HotelService",)
 class HotelService(IHotelService):
     hotel_repository: IHotelRepository
 
-    @Transactional()
     async def add_hotel(self, schema: HotelCreateRequest) -> HotelCreateResponse:
         hotel = await self.hotel_repository.add_hotel(values=schema.model_dump())
         return HotelCreateResponse.model_validate(hotel, from_attributes=True)
@@ -35,7 +33,6 @@ class HotelService(IHotelService):
         result = await self.hotel_repository.get_hotels(**params.model_dump(exclude_none=True))
         return PaginationResponse[HotelResponse].model_validate(result, from_attributes=True)
 
-    @Transactional()
     async def update_hotel(self, hotel_id: int, schema: HotelUpdate) -> HotelUpdate:
         hotel = await self.hotel_repository.update_hotel(
             hotel_id=hotel_id,

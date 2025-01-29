@@ -3,11 +3,10 @@ from typing import Any
 
 from sqlalchemy import select, func, insert, or_, and_, update
 
-from core.db.session import get_session
 from domain.entities import Booking
 from domain.repositories import IBookingRepository
 from domain.repositories.base import Repository
-from enums.status import BookingStatus
+from enums.status import Status
 from schemas.response import PaginationResponse
 
 __all__ = ("BookingRepository",)
@@ -22,18 +21,16 @@ class BookingRepository(IBookingRepository, Repository[Booking]):
             values(**values).
             returning(self.table)
         )
-        async with get_session() as session:
-            return await session.scalar(booking_stmt)
+        return await self.session.scalar(booking_stmt)
 
-    async def update_booking(self, booking_id: int, values: dict[str, Any]) -> Booking | None:
+    async def update_status(self, booking_id: int, status: Status) -> Booking | None:
         booking_stmt = (
             update(self.table).
             filter_by(id=booking_id).
-            values(**values).
+            values(status=status).
             returning(self.table)
         )
-        async with get_session() as session:
-            return await session.scalar(booking_stmt)
+        return await self.session.scalar(booking_stmt)
 
     async def get_user_bookings(
             self,
@@ -55,13 +52,12 @@ class BookingRepository(IBookingRepository, Repository[Booking]):
             select(func.count(self.table.id)).
             filter_by(user_id=user_id, **kwargs)
         )
-        async with get_session() as session:
-            bookings = (await session.scalars(bookings_stmt)).all()
-            count = await session.scalar(count_stmt)
-            return PaginationResponse(
-                count=count,
-                items=bookings
-            )
+        bookings = (await self.session.scalars(bookings_stmt)).all()
+        count = await self.session.scalar(count_stmt)
+        return PaginationResponse(
+            count=count,
+            items=bookings
+        )
 
     async def get_room_booking(self, room_id: int, date_from: date, date_to: date) -> Booking | None:
         booking_stmt = (
@@ -78,11 +74,10 @@ class BookingRepository(IBookingRepository, Repository[Booking]):
                         self.table.date_to > date_from,
                     ),
                 ),
-                Booking.status.in_([BookingStatus.pending, BookingStatus.confirmed])
+                Booking.status.in_([Status.pending, Status.succeeded])
             )
         )
-        async with get_session() as session:
-            return await session.scalar(booking_stmt)
+        return await self.session.scalar(booking_stmt)
 
     async def get_user_booking(self, booking_id: int, user_id: int) -> Booking | None:
         booking_stmt = (
@@ -92,13 +87,11 @@ class BookingRepository(IBookingRepository, Repository[Booking]):
                 user_id=user_id
             )
         )
-        async with get_session() as session:
-            return await session.scalar(booking_stmt)
+        return await self.session.scalar(booking_stmt)
 
     async def get_booking(self, booking_id: int) -> Booking | None:
         booking_stmt = (
             select(self.table).
             filter_by(id=booking_id)
         )
-        async with get_session() as session:
-            return await session.scalar(booking_stmt)
+        return await self.session.scalar(booking_stmt)

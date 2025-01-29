@@ -5,7 +5,7 @@ from fastapi import APIRouter, status, Depends, Query
 
 from api.deps import CurrentActiveUser, get_current_admin
 from core.container import Container
-from domain.services import IUserService
+from domain.usecases import IUserUseCase
 from schemas.response import Message
 from schemas.response import PaginationResponse
 from schemas.user import (
@@ -48,9 +48,9 @@ async def get_me(user: CurrentActiveUser):
 @inject
 async def get_users(
         params: Annotated[UserParams, Query()],
-        user_service: IUserService = Depends(Provide[Container.user_service])
+        user_use_case: IUserUseCase = Depends(Provide[Container.user_use_case])
 ):
-    return await user_service.get_users(params=params)
+    return await user_use_case.get_users(params=params)
 
 
 @router.post(
@@ -65,9 +65,9 @@ async def get_users(
 @inject
 async def reset_password(
         schema: PasswordResetRequest,
-        user_service: IUserService = Depends(Provide[Container.user_service])
+        user_use_case: IUserUseCase = Depends(Provide[Container.user_use_case])
 ):
-    return await user_service.reset_password(schema=schema)
+    return await user_use_case.reset_password(schema=schema)
 
 
 @router.post(
@@ -82,6 +82,6 @@ async def reset_password(
 @inject
 async def confirm_password_reset(
         schema: PasswordResetConfirm,
-        user_service: IUserService = Depends(Provide[Container.user_service])
+        user_use_case: IUserUseCase = Depends(Provide[Container.user_use_case])
 ):
-    return await user_service.confirm_reset_password(schema=schema)
+    return await user_use_case.confirm_reset_password(schema=schema)

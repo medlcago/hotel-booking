@@ -3,12 +3,12 @@ from decimal import Decimal
 
 from pydantic import BaseModel, PositiveInt, model_validator
 
-from enums.status import BookingStatus
+from enums.status import Status
 from schemas.filters import LimitOffset
 
 
 class BookingParams(LimitOffset):
-    status: BookingStatus | None = None
+    status: Status | None = None
 
 
 class BookingCreateRequest(BaseModel):
@@ -36,7 +36,7 @@ class BookingCreateResponse(BaseModel):
     total_cost: Decimal
     created_at: datetime
     updated_at: datetime
-    status: BookingStatus
+    status: Status
 
 
 class BookingResponse(BookingCreateResponse):

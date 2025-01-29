@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, status
 
 from api.deps import CurrentUser, RefreshTokenResult
 from core.container import Container
-from domain.services import IAuthService
+from domain.usecases import IAuthUseCase
 from schemas.auth import (
     SignUpRequest,
     SignInRequest,
@@ -22,9 +22,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @inject
 async def send_confirmation_email(
         user: CurrentUser,
-        auth_service: IAuthService = Depends(Provide[Container.auth_service])
+        auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_service.send_confirmation_email(email=user.email)
+    return await auth_use_case.send_confirmation_email(email=user.email)
 
 
 @router.get(
@@ -34,9 +34,9 @@ async def send_confirmation_email(
 @inject
 async def confirm_email(
         token: str,
-        auth_service: IAuthService = Depends(Provide[Container.auth_service])
+        auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_service.confirm_email(token=token)
+    return await auth_use_case.confirm_email(token=token)
 
 
 @router.post(
@@ -52,9 +52,9 @@ async def confirm_email(
 @inject
 async def sign_up(
         schema: SignUpRequest,
-        auth_service: IAuthService = Depends(Provide[Container.auth_service])
+        auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_service.sign_up(schema=schema)
+    return await auth_use_case.sign_up(schema=schema)
 
 
 @router.post(
@@ -69,9 +69,9 @@ async def sign_up(
 @inject
 async def sign_in(
         schema: SignInRequest,
-        auth_service: IAuthService = Depends(Provide[Container.auth_service])
+        auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_service.sign_in(schema=schema)
+    return await auth_use_case.sign_in(schema=schema)
 
 
 @router.post(
@@ -92,9 +92,9 @@ async def sign_in(
 @inject
 async def refresh_token(
         token: RefreshTokenResult,
-        auth_service: IAuthService = Depends(Provide[Container.auth_service])
+        auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_service.refresh_token(token=token)
+    return await auth_use_case.refresh_token(token=token)
 
 
 @router.post(
@@ -115,6 +115,6 @@ async def refresh_token(
 @inject
 async def logout(
         token: RefreshTokenResult,
-        auth_service: IAuthService = Depends(Provide[Container.auth_service])
+        auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    await auth_service.revoke_token(token=token)
+    await auth_use_case.revoke_token(token=token)

@@ -1,9 +1,8 @@
 from typing import Any
 
 from sqlalchemy import insert, select, func, update
-from sqlalchemy.orm import selectinload, undefer
+from sqlalchemy.orm import undefer
 
-from core.db.session import get_session
 from domain.entities import Hotel
 from domain.repositories import IHotelRepository
 from domain.repositories.base import Repository
@@ -22,17 +21,15 @@ class HotelRepository(IHotelRepository, Repository[Hotel]):
             values(**values).
             returning(self.table)
         )
-        async with get_session() as session:
-            return await session.scalar(hotel_stmt)
+        return await self.session.scalar(hotel_stmt)
 
     async def get_hotel_by_id(self, hotel_id: int) -> Hotel | None:
         hotel_stmt = (
             select(self.table).
             filter_by(id=hotel_id).
-            options(selectinload(self.table.rooms), undefer(self.table.rating))  # noqa
+            options(undefer(self.table.rating))  # noqa
         )
-        async with get_session() as session:
-            return await session.scalar(hotel_stmt)
+        return await self.session.scalar(hotel_stmt)
 
     async def get_hotels(
             self,
@@ -62,13 +59,12 @@ class HotelRepository(IHotelRepository, Repository[Hotel]):
             hotels_stmt = hotels_stmt.filter(self.table.location.ilike(f"%{location}%"))
             count_stmt = count_stmt.filter(self.table.location.ilike(f"%{location}%"))
 
-        async with get_session() as session:
-            hotels = (await session.scalars(hotels_stmt)).all()
-            count = (await session.scalar(count_stmt))
-            return PaginationResponse(
-                count=count,
-                items=hotels,
-            )
+        hotels = (await self.session.scalars(hotels_stmt)).all()
+        count = (await self.session.scalar(count_stmt))
+        return PaginationResponse(
+            count=count,
+            items=hotels,
+        )
 
     async def update_hotel(self, hotel_id: int, values: dict[str, Any]) -> Hotel | None:
         hotel_stmt = (
@@ -77,5 +73,4 @@ class HotelRepository(IHotelRepository, Repository[Hotel]):
             values(**values).
             returning(self.table)
         )
-        async with get_session() as session:
-            return await session.scalar(hotel_stmt)
+        return await self.session.scalar(hotel_stmt)

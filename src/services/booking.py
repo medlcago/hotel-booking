@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
 
-from core.db.transactional import Transactional
 from core.exceptions import (
     RoomNotFound,
     RoomAlreadyBooked,
@@ -11,14 +10,12 @@ from core.exceptions import (
 )
 from domain.repositories import IRoomRepository, IBookingRepository
 from domain.services import IBookingService
-from enums.status import BookingStatus
-
+from enums.status import Status
 from schemas.booking import (
     BookingCreateRequest,
     BookingResponse,
     BookingCreateResponse,
-    BookingParams,
-    BookingCancelRequest
+    BookingParams
 )
 from schemas.response import PaginationResponse
 
@@ -30,7 +27,6 @@ class BookingService(IBookingService):
     room_repository: IRoomRepository
     booking_repository: IBookingRepository
 
-    @Transactional()
     async def create_booking(self, schema: BookingCreateRequest, user_id: int) -> BookingCreateResponse:
         room = await self.room_repository.get_room_by_id(room_id=schema.room_id)
         if not room:
@@ -44,35 +40,36 @@ class BookingService(IBookingService):
             raise RoomAlreadyBooked
 
         booking = await self.booking_repository.create_booking(
-            values=dict(**schema.model_dump(), user_id=user_id)
+            values=dict(
+                user_id=user_id,
+                room_id=schema.room_id,
+                date_from=schema.date_from,
+                date_to=schema.date_to
+            )
         )
         return BookingCreateResponse.model_validate(booking, from_attributes=True)
 
-    @Transactional()
-    async def cancel_booking(self, schema: BookingCancelRequest, user_id: int) -> None:
-        booking = await self.booking_repository.get_user_booking(booking_id=schema.booking_id, user_id=user_id)
+    async def cancel_booking(self, booking_id: int, user_id: int) -> None:
+        booking = await self.booking_repository.get_user_booking(booking_id=booking_id, user_id=user_id)
         if not booking:
             raise BookingNotFound
-        if booking.status != BookingStatus.pending or booking.date_to <= date.today():
+        if booking.status != Status.pending or booking.date_to <= date.today():
             raise BookingCancelNotAllowed
-        await self.booking_repository.update_booking(
-            booking_id=schema.booking_id,
-            values=dict(status=BookingStatus.canceled)
+        await self.booking_repository.update_status(
+            booking_id=booking_id,
+            status=Status.canceled
         )
 
-    @Transactional()
-    async def confirm_booking(self, booking_id: int, payment_id: str) -> None:
+    async def confirm_booking(self, booking_id: int) -> None:
         # TODO: add payment service
-        booking = await self.booking_repository.get_booking(booking_id=booking_id)
-        if not booking:
-            raise BookingNotFound
-        if booking.status != BookingStatus.pending:
+        booking = await self.get_booking(booking_id=booking_id)
+        if booking.status != Status.pending:
             raise BookingConfirmNotAllowed(
                 f"Confirmation of booking is not allowed. Current status: {booking.status}"
             )
-        await self.booking_repository.update_booking(
+        await self.booking_repository.update_status(
             booking_id=booking_id,
-            values=dict(status=BookingStatus.confirmed)
+            status=Status.succeeded
         )
 
     async def get_user_bookings(self, user_id: int, params: BookingParams) -> PaginationResponse[BookingResponse]:
@@ -87,6 +84,12 @@ class BookingService(IBookingService):
 
     async def get_user_booking(self, booking_id: int, user_id: int) -> BookingResponse:
         booking = await self.booking_repository.get_user_booking(booking_id=booking_id, user_id=user_id)
+        if not booking:
+            raise BookingNotFound
+        return BookingResponse.model_validate(booking, from_attributes=True)
+
+    async def get_booking(self, booking_id: int) -> BookingResponse:
+        booking = await self.booking_repository.get_booking(booking_id=booking_id)
         if not booking:
             raise BookingNotFound
         return BookingResponse.model_validate(booking, from_attributes=True)

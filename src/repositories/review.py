@@ -3,7 +3,6 @@ from typing import Any
 from sqlalchemy import insert, select, func, delete
 from sqlalchemy.exc import IntegrityError
 
-from core.db.session import get_session
 from core.exceptions import ReviewAlreadyExists
 from domain.entities import Review
 from domain.repositories import IReviewRepository
@@ -23,11 +22,10 @@ class ReviewRepository(IReviewRepository, Repository[Review]):
             values(**values).
             returning(self.table)
         )
-        async with get_session() as session:
-            try:
-                return await session.scalar(review_stmt)
-            except IntegrityError:
-                raise ReviewAlreadyExists
+        try:
+            return await self.session.scalar(review_stmt)
+        except IntegrityError:
+            raise ReviewAlreadyExists
 
     async def get_reviews(
             self,
@@ -50,26 +48,23 @@ class ReviewRepository(IReviewRepository, Repository[Review]):
             select(func.count(self.table.id)).
             filter_by(**kwargs)
         )
-        async with get_session() as session:
-            reviews = (await session.scalars(reviews_stmt)).all()
-            count = await session.scalar(count_stmt)
-            return PaginationResponse(
-                count=count,
-                items=reviews,
-            )
+        reviews = (await self.session.scalars(reviews_stmt)).all()
+        count = await self.session.scalar(count_stmt)
+        return PaginationResponse(
+            count=count,
+            items=reviews,
+        )
 
     async def get_user_review(self, review_id: int, user_id: int) -> Review | None:
         review_stmt = (
             select(self.table).
             filter_by(id=review_id, user_id=user_id)
         )
-        async with get_session() as session:
-            return await session.scalar(review_stmt)
+        return await self.session.scalar(review_stmt)
 
     async def delete_review(self, review_id: int, user_id: int) -> None:
         review_stmt = (
             delete(self.table).
             filter_by(id=review_id, user_id=user_id)
         )
-        async with get_session() as session:
-            await session.execute(review_stmt)
+        await self.session.execute(review_stmt)

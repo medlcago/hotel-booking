@@ -11,6 +11,7 @@ from core.settings import settings
 from middlewares import init_middlewares
 from middlewares.throttling import Throttling
 from utils.cache import init_cache
+from utils.db_session import init_db_session
 
 
 class APIServer:
@@ -33,6 +34,9 @@ class APIServer:
 
     @asynccontextmanager
     async def lifespan(self, _: FastAPI) -> AsyncIterator[None]:
+        init_db_session(
+            engine=self.container.db_engine()
+        )
         await init_cache(
             redis_url=str(settings.redis.url),
             prefix="fastapi-cache",
