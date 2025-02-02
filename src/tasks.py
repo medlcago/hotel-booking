@@ -3,9 +3,13 @@ import uuid
 
 from asgiref.sync import async_to_sync
 from celery import Celery
+from dependency_injector import providers
+from sqlalchemy import NullPool
 
 from core.container import Container
+from core.db.engine import Engine
 from core.db.scope import session_scope
+from core.exceptions import BookingNotFound
 from core.settings import settings
 from utils.booking import cancel_pending_booking
 from utils.db_session import init_db_session
@@ -15,6 +19,11 @@ from utils.template import render_template
 
 def create_celery_app() -> Celery:
     container: Container = Container()
+    container.db_engine.override(providers.Singleton(
+        Engine.create,
+        url=settings.db.dsn,
+        poolclass=NullPool
+    ))  # poolclass=NullPool - fix InterfaceError - cannot perform operation: another operation is in progress
     _db_engine = container.db_engine()
     init_db_session(_db_engine)
     _celery_app = container.celery_app()
@@ -50,7 +59,9 @@ def send_reset_password_email(email: str, token: str) -> None:
 
 @celery.task(
     name="cancel_pending_booking",
+    dont_autoretry_for=(BookingNotFound,),
     autoretry_for=(Exception,),
+    retry_kwargs={"max_retries": None},
     retry_backoff=True
 )
 def cancel_pending_booking_task(booking_id: int) -> None:
