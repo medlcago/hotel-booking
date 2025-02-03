@@ -13,7 +13,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8000"
-    command: sh -c "poetry run alembic upgrade head & poetry run python ./src/main.py"
+    command: sh -c "uv run alembic upgrade head & uv run ./src/main.py"
     depends_on:
       - database
       - redis
@@ -84,7 +84,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: sh -c "poetry run celery -A src.tasks worker --loglevel=info"
+    command: sh -c "uv run celery -A src.tasks worker --loglevel=info"
     depends_on:
       - hotel_booking
       - redis
@@ -95,7 +95,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: sh -c "poetry run celery -A src.tasks flower --loglevel=info"
+    command: sh -c "uv run celery -A src.tasks flower --loglevel=info"
     ports:
       - "5557:5555"
     depends_on:
