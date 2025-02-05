@@ -1,7 +1,8 @@
 from typing import Annotated
 
 from dependency_injector.wiring import inject, Provide
-from fastapi import Depends
+from fastapi import Depends, Request
+from yookassa.domain.notification import WebhookNotification
 
 from core.container import Container
 from core.exceptions import (
@@ -62,3 +63,14 @@ async def get_current_admin(user: CurrentUser) -> UserResponse:
 
 
 CurrentAdmin = Annotated[UserResponse, Depends(get_current_admin)]
+
+
+async def get_yookassa_webhook_notification(request: Request) -> WebhookNotification:
+    event_json = await request.json()
+    notification_object = WebhookNotification(event_json)
+    if not (notification_object.event and notification_object.type and notification_object.object):
+        raise ForbiddenException
+    return notification_object
+
+
+YookassaWebhookNotification = Annotated[WebhookNotification, Depends(get_yookassa_webhook_notification)]

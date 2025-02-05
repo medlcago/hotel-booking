@@ -52,7 +52,7 @@ class BookingService(IBookingService):
         )
         self.celery.send_task(
             name="cancel_pending_booking",
-            args=(booking.id,),
+            args=(booking.id, user_id),
             countdown=timedelta(minutes=15).seconds
         )
         return BookingCreateResponse.model_validate(booking, from_attributes=True)
@@ -68,9 +68,8 @@ class BookingService(IBookingService):
             status=Status.canceled
         )
 
-    async def confirm_booking(self, booking_id: int) -> None:
-        # TODO: add payment service
-        booking = await self.get_booking(booking_id=booking_id)
+    async def confirm_booking(self, booking_id: int, user_id: int) -> None:
+        booking = await self.get_user_booking(booking_id=booking_id, user_id=user_id)
         if booking.status != Status.pending:
             raise BookingConfirmNotAllowed(
                 f"Confirmation of booking is not allowed. Current status: {booking.status}"
@@ -96,14 +95,8 @@ class BookingService(IBookingService):
             raise BookingNotFound
         return BookingResponse.model_validate(booking, from_attributes=True)
 
-    async def get_booking(self, booking_id: int) -> BookingResponse:
-        booking = await self.booking_repository.get_booking(booking_id=booking_id)
-        if not booking:
-            raise BookingNotFound
-        return BookingResponse.model_validate(booking, from_attributes=True)
-
-    async def cancel_pending_booking(self, booking_id: int) -> None:
-        booking = await self.get_booking(booking_id=booking_id)
+    async def cancel_pending_booking(self, booking_id: int, user_id: int) -> None:
+        booking = await self.get_user_booking(booking_id=booking_id, user_id=user_id)
         if booking.status == Status.pending:
             await self.booking_repository.update_status(
                 booking_id=booking_id,

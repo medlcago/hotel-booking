@@ -12,6 +12,7 @@ from domain.entities.base import Base, TimeStampMixin
 if TYPE_CHECKING:
     from domain.entities import Review
     from domain.entities import Booking
+    from domain.entities import Payment
 
 
 class User(Base, TimeStampMixin):
@@ -32,3 +33,4 @@ class User(Base, TimeStampMixin):
 
     reviews: Mapped[list[Review]] = relationship(back_populates="user")
     bookings: Mapped[list[Booking]] = relationship(back_populates="user")
+    payments: Mapped[list[Payment]] = relationship(back_populates="user")

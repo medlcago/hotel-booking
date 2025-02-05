@@ -18,7 +18,8 @@ from services import (
     HotelService,
     ReviewService,
     RoomService,
-    UserService
+    UserService,
+    YookassaService
 )
 from stores.redis import RedisStore
 from usecases import (
@@ -135,6 +136,13 @@ class Container(containers.DeclarativeContainer):
         smtp_password=settings.smtp_server.password,
     )
 
+    yookassa_service = providers.Factory(
+        YookassaService,
+        shop_id=settings.yookassa.shop_id,
+        secret_key=settings.yookassa.secret_key,
+        payment_repository=payment_repository
+    )
+
     auth_use_case = providers.Factory(
         AuthUseCase,
         auth_service=auth_service,
@@ -148,6 +156,7 @@ class Container(containers.DeclarativeContainer):
     booking_use_case = providers.Factory(
         BookingUseCase,
         booking_service=booking_service,
+        payment_service=yookassa_service
     )
 
     room_use_case = providers.Factory(

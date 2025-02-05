@@ -58,12 +58,19 @@ class Celery(BaseModel):
     backend_url: str
 
 
+class Yookassa(BaseModel):
+    shop_id: str
+    secret_key: str
+    return_url: str
+
+
 class Settings(BaseSettings):
     secret_key: SecretStr
     db: Database
     redis: Redis
     smtp_server: SmtpServer
     celery: Celery
+    yookassa: Yookassa
     templates: Jinja2Templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
     base_url: str

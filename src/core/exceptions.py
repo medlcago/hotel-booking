@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
+from yookassa.domain.exceptions import ApiError as YookassaApiError
 
 
 class APIException(Exception):
@@ -49,9 +50,17 @@ async def db_exception_handler(request: Request, exc: SQLAlchemyError) -> JSONRe
     )
 
 
+async def yookassa_api_exception_handler(request: Request, exc: YookassaApiError) -> JSONResponse:  # noqa
+    return JSONResponse(
+        status_code=exc.HTTP_CODE,
+        content=exc.content
+    )
+
+
 def init_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(APIException, api_exception_handler)  # noqa
     app.add_exception_handler(SQLAlchemyError, db_exception_handler)  # noqa
+    app.add_exception_handler(YookassaApiError, yookassa_api_exception_handler)  # noqa
 
 
 class TooManyRequestsException(APIException):
@@ -148,3 +157,7 @@ class ReviewDeleteNotAllowed(ForbiddenException):
 
 class TokenExpired(BadRequestException):
     description = "The token has expired."
+
+
+class PaymentNotFound(NotFoundException):
+    description = "Payment not found."

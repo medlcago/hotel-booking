@@ -5,6 +5,7 @@ from .hotel import HotelService
 from .review import ReviewService
 from .room import RoomService
 from .user import UserService
+from .yookassa import YookassaService
 
 __all__ = (
     "AuthService",
@@ -14,4 +15,5 @@ __all__ = (
     "ReviewService",
     "RoomService",
     "UserService",
+    "YookassaService",
 )

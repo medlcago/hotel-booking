@@ -36,7 +36,3 @@ class IBookingRepository(ABC):
     @abstractmethod
     async def get_user_booking(self, booking_id: int, user_id: int) -> Booking | None:
         raise NotImplementedError
-
-    @abstractmethod
-    async def get_booking(self, booking_id: int) -> Booking | None:
-        raise NotImplementedError

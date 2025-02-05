@@ -88,10 +88,3 @@ class BookingRepository(IBookingRepository, Repository[Booking]):
             )
         )
         return await self.session.scalar(booking_stmt)
-
-    async def get_booking(self, booking_id: int) -> Booking | None:
-        booking_stmt = (
-            select(self.table).
-            filter_by(id=booking_id)
-        )
-        return await self.session.scalar(booking_stmt)

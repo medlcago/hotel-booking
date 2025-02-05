@@ -64,12 +64,13 @@ def send_reset_password_email(email: str, token: str) -> None:
     retry_kwargs={"max_retries": None},
     retry_backoff=True
 )
-def cancel_pending_booking_task(booking_id: int) -> None:
+def cancel_pending_booking_task(booking_id: int, user_id: int) -> None:
     async def async_wrapper():
-        session_id = uuid.uuid4()
+        session_id = str(uuid.uuid4())
         async with session_scope(session_id):
             await cancel_pending_booking(
                 booking_id=booking_id,
+                user_id=user_id,
             )
 
     async_to_sync(async_wrapper)()

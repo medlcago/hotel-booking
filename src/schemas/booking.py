@@ -5,6 +5,7 @@ from pydantic import BaseModel, PositiveInt, model_validator
 
 from enums.status import Status
 from schemas.filters import LimitOffset
+from schemas.payment import PaymentResponse, PaymentCreateResponse
 
 
 class BookingParams(LimitOffset):
@@ -39,8 +40,12 @@ class BookingCreateResponse(BaseModel):
     status: Status
 
 
+class BookingPaymentResponse(BookingCreateResponse):
+    payment: PaymentCreateResponse
+
+
 class BookingResponse(BookingCreateResponse):
-    pass
+    payment: PaymentResponse
 
 
 class BookingCancelRequest(BaseModel):

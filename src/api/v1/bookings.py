@@ -9,10 +9,10 @@ from core.container import Container
 from domain.usecases import IBookingUseCase
 from schemas.booking import (
     BookingCreateRequest,
-    BookingCreateResponse,
     BookingResponse,
     BookingParams,
-    BookingCancelRequest
+    BookingCancelRequest,
+    BookingPaymentResponse
 )
 from schemas.response import PaginationResponse
 
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/bookings", tags=["bookings"])
 
 @router.post(
     path="/",
-    response_model=BookingCreateResponse,
+    response_model=BookingPaymentResponse,
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_400_BAD_REQUEST: {

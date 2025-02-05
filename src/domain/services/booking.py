@@ -7,8 +7,8 @@ if TYPE_CHECKING:
     from schemas.booking import (
         BookingCreateRequest,
         BookingResponse,
-        BookingCreateResponse,
-        BookingParams
+        BookingParams,
+        BookingCreateResponse
     )
     from schemas.response import PaginationResponse
 
@@ -23,7 +23,7 @@ class IBookingService(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def confirm_booking(self, booking_id: int) -> None:
+    async def confirm_booking(self, booking_id: int, user_id: int) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -35,9 +35,5 @@ class IBookingService(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_booking(self, booking_id: int) -> BookingResponse:
-        raise NotImplementedError
-
-    @abstractmethod
-    async def cancel_pending_booking(self, booking_id: int) -> None:
+    async def cancel_pending_booking(self, booking_id: int, user_id: int) -> None:
         raise NotImplementedError
