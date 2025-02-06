@@ -6,40 +6,48 @@
     <title>Подтверждение почты</title>
     <style>
         body {
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 20px;
+            line-height: 1.6;
         }
 
         .container {
             max-width: 600px;
             margin: auto;
             background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
-
-        .header {
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
             text-align: center;
-            margin-bottom: 20px;
         }
 
-        .confirm-btn {
+        h2 {
+            color: #333;
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .confirm-code {
             display: inline-block;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 15px 25px;
+            font-size: 20px;
             color: #ffffff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 20px;
-            text-decoration: none;
+            background-color: #28a745;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: background-color 0.5s;
+        }
+
+        .confirm-code:hover {
+            background-color: #218838;
         }
 
         .footer {
-            margin-top: 20px;
-            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
         }
     </style>
 </head>
@@ -50,9 +58,12 @@
     </div>
     <div class="body">
         <p>Здравствуйте!</p>
-        <p>Пожалуйста, подтвердите ваш адрес электронной почты, нажав на кнопку ниже:</p>
-        <a href="{{ confirmation_link }}" class="confirm-btn">Подтвердить почту</a>
-        <p class="footer">Если вы не инициировали это действие, просто проигнорируйте это письмо.</p>
+        <p>Пожалуйста, подтвердите ваш адрес электронной почты, используя код ниже:</p>
+        <p class="confirm-code">{{ code }}</p>
+        <p>Если вы не инициировали это действие, просто проигнорируйте это письмо.</p>
+    </div>
+    <div class="footer">
+        <p>Спасибо за использование нашего сервиса!</p>
     </div>
 </div>
 </body>

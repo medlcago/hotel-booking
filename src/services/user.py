@@ -1,11 +1,13 @@
 from dataclasses import dataclass
+from datetime import timedelta
 
 from celery import Celery
 
 from core import security
 from core.exceptions import (
-    TokenExpired,
-    UserNotFound
+    UserNotFound,
+    InvalidCode,
+    CodeAlreadySent
 )
 from domain.repositories import IUserRepository
 from domain.services import IUserService
@@ -17,6 +19,7 @@ from schemas.user import (
     PasswordResetRequest,
     PasswordResetConfirm
 )
+from stores.base import Store
 
 __all__ = ("UserService",)
 
@@ -25,6 +28,7 @@ __all__ = ("UserService",)
 class UserService(IUserService):
     user_repository: IUserRepository
     celery: Celery
+    store: Store
 
     async def get_user_by_email(self, email: str) -> UserResponse:
         user = await self.user_repository.get_user_by_email(email=email)
@@ -49,24 +53,30 @@ class UserService(IUserService):
         user = await self.user_repository.get_user_by_email(email=str(schema.email))
         if not user:
             raise UserNotFound
-        token = security.create_url_safe_token(data=dict(email=schema.email, action="reset_password"))
-        self.celery.send_task(name="send_reset_password_email", args=(schema.email, token))
+        key = f"reset_password:{schema.email}"
+        expires_in = await self.store.expires_in(key)
+        if expires_in:
+            raise CodeAlreadySent(headers={
+                "Retry-After": str(expires_in)
+            })
+        code = security.generate_code()
+        self.celery.send_task(name="send_reset_password_code", args=(schema.email, code))
+        await self.store.set(key, code, timedelta(minutes=2))
         return Message(
-            message="An email has been sent to your email address to reset your password!",
+            message="A password reset code has been sent to your email address!",
         )
 
     async def confirm_reset_password(self, schema: PasswordResetConfirm) -> Message:
-        payload = security.decode_url_safe_token(token=schema.token, max_age=300)
-        if not payload:
-            raise TokenExpired
-        email, action = payload.get("email"), payload.get("action")
-        if not email or action != "reset_password":
-            raise TokenExpired
-        user = await self.user_repository.get_user_by_email(email=email)
+        key = f"reset_password:{schema.email}"
+        code = await self.store.get(key)
+        if not code or code.decode("utf-8") != schema.code:
+            raise InvalidCode
+        user = await self.user_repository.get_user_by_email(email=schema.email)
         if not user:
-            raise TokenExpired
+            raise InvalidCode
         hashed_password = security.hash_password(schema.new_password)
         await self.user_repository.update_user(user_id=user.id, values=dict(password=hashed_password))
+        await self.store.delete(key)
         return Message(
             message="Password reset successful!",
         )

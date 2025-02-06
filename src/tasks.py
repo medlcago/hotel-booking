@@ -33,10 +33,9 @@ def create_celery_app() -> Celery:
 celery = create_celery_app()
 
 
-@celery.task(name="send_confirmation_email", ingore_result=True)
-def send_confirmation_email(email: str, token: str) -> None:
-    confirmation_link = f"{settings.base_url}/confirm-email?token={token}"
-    body = render_template("email_confirmation.html", confirmation_link=confirmation_link)
+@celery.task(name="send_confirmation_code", ingore_result=True)
+def send_confirmation_code_task(email: str, code: str) -> None:
+    body = render_template("email_confirmation.html", code=code)
     async_to_sync(send_email)(
         subject="Confirm your email",
         recipients=[email],
@@ -45,10 +44,9 @@ def send_confirmation_email(email: str, token: str) -> None:
     )
 
 
-@celery.task(name="send_reset_password_email", ignore_result=True)
-def send_reset_password_email(email: str, token: str) -> None:
-    # TODO password reset form
-    body = render_template("reset_password.html", token=token)
+@celery.task(name="send_reset_password_code", ignore_result=True)
+def send_reset_password_code_task(email: str, code: str) -> None:
+    body = render_template("reset_password.html", code=code)
     async_to_sync(send_email)(
         subject="Reset your password",
         recipients=[email],

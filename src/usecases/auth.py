@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from core.db.transactional import Transactional
 from domain.services import IAuthService
 from domain.usecases import IAuthUseCase
-from schemas.auth import SignUpRequest, SignInRequest
+from schemas.auth import SignUpRequest, SignInRequest, ConfirmEmailRequest
 from schemas.response import Message
 from schemas.token import TokenResult, Token
 
@@ -25,11 +25,11 @@ class AuthUseCase(IAuthUseCase):
         return await self.auth_service.refresh_token(token=token)
 
     @Transactional()
-    async def confirm_email(self, token: str) -> Message:
-        return await self.auth_service.confirm_email(token=token)
+    async def confirm_email(self, schema: ConfirmEmailRequest) -> Message:
+        return await self.auth_service.confirm_email(schema=schema)
 
-    async def send_confirmation_email(self, email: str) -> Message:
-        return await self.auth_service.send_confirmation_email(email=email)
+    async def send_confirmation_code(self, email: str) -> Message:
+        return await self.auth_service.send_confirmation_code(email=email)
 
     async def revoke_token(self, token: TokenResult) -> None:
         return await self.auth_service.revoke_token(token=token)

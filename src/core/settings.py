@@ -79,8 +79,8 @@ class Settings(BaseSettings):
     access_token_lifetime: timedelta = timedelta(minutes=30)
     refresh_token_lifetime: timedelta = timedelta(days=1)
 
-    default_throttle_limit: int
-    default_throttle_time: int
+    default_rate_limit: int
+    default_rate_ttl: int
 
     log_config: PurePath = BASE_DIR / "log_conf.yaml"
 

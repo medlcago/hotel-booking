@@ -1,3 +1,4 @@
+import random
 from datetime import datetime, UTC, timedelta
 from typing import Any
 
@@ -105,6 +106,10 @@ def decode_token(token: str) -> dict[str, Any]:
         return payload
     except jwt.PyJWTError:
         return {}
+
+
+def generate_code() -> str:
+    return str(random.randint(100000, 999999))
 
 
 class TokenBearer(HTTPBearer):

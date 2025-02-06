@@ -159,5 +159,13 @@ class TokenExpired(BadRequestException):
     description = "The token has expired."
 
 
+class InvalidCode(BadRequestException):
+    description = "Invalid code."
+
+
+class CodeAlreadySent(TooManyRequestsException):
+    description = "Code has already been sent!"
+
+
 class PaymentNotFound(NotFoundException):
     description = "Payment not found."

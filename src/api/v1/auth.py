@@ -7,6 +7,7 @@ from domain.usecases import IAuthUseCase
 from schemas.auth import (
     SignUpRequest,
     SignInRequest,
+    ConfirmEmailRequest,
 )
 from schemas.response import Message
 from schemas.token import Token
@@ -15,27 +16,27 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post(
-    path="/confirm-email",
+    path="/confirmation-code",
     response_model=Message
 )
 @inject
-async def send_confirmation_email(
+async def send_confirmation_code(
         user: CurrentUser,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_use_case.send_confirmation_email(email=user.email)
+    return await auth_use_case.send_confirmation_code(email=user.email)
 
 
-@router.get(
+@router.post(
     path="/confirm-email",
     response_model=Message
 )
 @inject
 async def confirm_email(
-        token: str,
+        schema: ConfirmEmailRequest,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_use_case.confirm_email(token=token)
+    return await auth_use_case.confirm_email(schema=schema)
 
 
 @router.post(

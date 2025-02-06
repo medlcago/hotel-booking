@@ -96,7 +96,8 @@ class Container(containers.DeclarativeContainer):
     user_service = providers.Factory(
         UserService,
         user_repository=user_repository,
-        celery=celery_app
+        celery=celery_app,
+        store=redis_store
     )
 
     hotel_service = providers.Factory(

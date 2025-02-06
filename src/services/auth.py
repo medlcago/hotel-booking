@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import timedelta
 
 from celery import Celery
 
@@ -9,12 +10,14 @@ from core.exceptions import (
     UserInactive,
     TokenExpired,
     UserAlreadyVerified,
+    InvalidCode,
+    CodeAlreadySent,
 )
 from core.settings import settings
 from domain.repositories import IUserRepository
 from domain.services import IAuthService
 from enums.token import TokenType
-from schemas.auth import SignInRequest
+from schemas.auth import SignInRequest, ConfirmEmailRequest
 from schemas.auth import SignUpRequest
 from schemas.response import Message
 from schemas.token import Token, TokenResult
@@ -36,8 +39,10 @@ class AuthService(IAuthService):
 
         schema.password = security.hash_password(schema.password)
         user = await self.user_repository.create_user(values=schema.model_dump())
-        token = security.create_url_safe_token(data=dict(email=schema.email, action="confirm_email"))
-        self.celery.send_task(name="send_confirmation_email", args=(schema.email, token))
+        key = f"confirmation_code:{schema.email}"
+        code = security.generate_code()
+        await self.store.set(key, code, timedelta(minutes=2))
+        self._send_code(email=user.email, code=code)
         return self.get_token(user_id=user.id)
 
     async def sign_in(self, schema: SignInRequest) -> Token:
@@ -63,39 +68,44 @@ class AuthService(IAuthService):
         await self.revoke_token(token=token)
         return self.get_token(user_id=token.user_id)
 
-    async def confirm_email(self, token: str) -> Message:
-        payload = security.decode_url_safe_token(token=token, max_age=86400)
-        if not payload:
-            raise TokenExpired
-        email, action = payload.get("email"), payload.get("action")
-        if not email or action != "confirm_email":
-            raise TokenExpired
-        user = await self.user_repository.get_user_by_email(email=email)
+    async def confirm_email(self, schema: ConfirmEmailRequest) -> Message:
+        key = f"confirmation_code:{schema.email}"
+        code = await self.store.get(key)
+        if not code or code.decode("utf-8") != schema.code:
+            raise InvalidCode
+        user = await self.user_repository.get_user_by_email(email=schema.email)
         if not user or user.is_verified:
-            raise TokenExpired
+            raise InvalidCode
         await self.user_repository.update_user(user_id=user.id, values=dict(is_verified=True))
+        await self.store.delete(key)
         return Message(
             message="E-mail successfully confirmed!"
         )
 
-    async def send_confirmation_email(self, email: str) -> Message:
+    async def send_confirmation_code(self, email: str) -> Message:
         user = await self.user_repository.get_user_by_email(email=email)
         if not user:
             raise BadCredentials
         if user.is_verified:
             raise UserAlreadyVerified
-        token = security.create_url_safe_token(data=dict(email=email, action="confirm_email"))
-        self.celery.send_task(name="send_confirmation_email", args=(email, token))
+        key = f"confirmation_code:{email}"
+        expires_in = await self.store.expires_in(key)
+        if expires_in:
+            raise CodeAlreadySent(headers={
+                "Retry-After": str(expires_in)
+            })
+        code = security.generate_code()
+        await self.store.set(key, code, timedelta(minutes=2))
+        self._send_code(email=email, code=code)
         return Message(
             message="E-mail successfully sent!"
         )
 
-    @staticmethod
-    def make_token_key(token: TokenResult) -> str:
-        return f"{token.token_type}:{token.token}:{token.user_id}"
+    def _send_code(self, email: str, code: str) -> None:
+        self.celery.send_task(name="send_confirmation_code", args=(email, code))
 
     async def revoke_token(self, token: TokenResult) -> None:
-        key = self.make_token_key(token)
+        key = f"{token.token_type}:{token.token}:{token.user_id}"
         exists = await self.store.exists(key=key)
         if exists:
             raise TokenExpired

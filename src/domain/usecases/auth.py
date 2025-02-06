@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from schemas.auth import SignUpRequest, SignInRequest
+    from schemas.auth import SignUpRequest, SignInRequest, ConfirmEmailRequest
     from schemas.response import Message
     from schemas.token import Token, TokenResult
 
@@ -23,11 +23,11 @@ class IAuthUseCase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def confirm_email(self, token: str) -> Message:
+    async def confirm_email(self, schema: ConfirmEmailRequest) -> Message:
         raise NotImplementedError
 
     @abstractmethod
-    async def send_confirmation_email(self, email: str) -> Message:
+    async def send_confirmation_code(self, email: str) -> Message:
         raise NotImplementedError
 
     @abstractmethod

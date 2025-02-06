@@ -9,7 +9,7 @@ from core.container import Container
 from core.exceptions import init_exception_handlers
 from core.settings import settings
 from middlewares import init_middlewares
-from middlewares.throttling import Throttling
+from middlewares.limiter import Limiter
 from utils.cache import init_cache
 from utils.db_session import init_db_session
 
@@ -23,9 +23,9 @@ class APIServer:
             debug=settings.debug,
             dependencies=[
                 Depends(
-                    Throttling(
-                        limit=settings.default_throttle_limit,
-                        throttle_time=settings.default_throttle_time
+                    Limiter(
+                        limit=settings.default_rate_limit,
+                        ttl=settings.default_rate_ttl
                     )
                 )
             ]
