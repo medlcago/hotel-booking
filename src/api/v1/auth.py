@@ -9,7 +9,7 @@ from schemas.auth import (
     SignInRequest,
     ConfirmEmailRequest,
 )
-from schemas.response import Message
+from schemas.response import Message, APIResponse
 from schemas.token import Token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -17,31 +17,42 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post(
     path="/confirmation-code",
-    response_model=Message
+    response_model=APIResponse[Message],
+    response_model_exclude_none=True,
 )
 @inject
 async def send_confirmation_code(
         user: CurrentUser,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_use_case.send_confirmation_code(email=user.email)
+    result = await auth_use_case.send_confirmation_code(email=user.email)
+    return APIResponse(
+        ok=True,
+        result=result
+    )
 
 
 @router.post(
     path="/confirm-email",
-    response_model=Message
+    response_model=APIResponse[Message],
+    response_model_exclude_none=True,
 )
 @inject
 async def confirm_email(
         schema: ConfirmEmailRequest,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_use_case.confirm_email(schema=schema)
+    result = await auth_use_case.confirm_email(schema=schema)
+    return APIResponse(
+        ok=True,
+        result=result
+    )
 
 
 @router.post(
     path="/sign-up",
-    response_model=Token,
+    response_model=APIResponse[Token],
+    response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_409_CONFLICT: {
@@ -54,12 +65,17 @@ async def sign_up(
         schema: SignUpRequest,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_use_case.sign_up(schema=schema)
+    result = await auth_use_case.sign_up(schema=schema)
+    return APIResponse(
+        ok=True,
+        result=result
+    )
 
 
 @router.post(
     path="/sign-in",
-    response_model=Token,
+    response_model=APIResponse[Token],
+    response_model_exclude_none=True,
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Invalid credentials",
@@ -71,12 +87,17 @@ async def sign_in(
         schema: SignInRequest,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_use_case.sign_in(schema=schema)
+    result = await auth_use_case.sign_in(schema=schema)
+    return APIResponse(
+        ok=True,
+        result=result
+    )
 
 
 @router.post(
     path="/refresh-token",
-    response_model=Token,
+    response_model=APIResponse[Token],
+    response_model_exclude_none=True,
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Invalid token",
@@ -94,12 +115,18 @@ async def refresh_token(
         token: RefreshTokenResult,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    return await auth_use_case.refresh_token(token=token)
+    result = await auth_use_case.refresh_token(token=token)
+    return APIResponse(
+        ok=True,
+        result=result
+    )
 
 
 @router.post(
     path="/logout",
-    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=APIResponse,
+    response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             "description": "Invalid token",
@@ -117,4 +144,8 @@ async def logout(
         token: RefreshTokenResult,
         auth_use_case: IAuthUseCase = Depends(Provide[Container.auth_use_case])
 ):
-    await auth_use_case.revoke_token(token=token)
+    result = await auth_use_case.revoke_token(token=token)
+    return APIResponse(
+        ok=True,
+        result=result
+    )

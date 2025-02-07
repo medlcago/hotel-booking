@@ -1,11 +1,5 @@
 from http import HTTPStatus
 
-from fastapi import FastAPI
-from fastapi.requests import Request
-from fastapi.responses import JSONResponse
-from sqlalchemy.exc import SQLAlchemyError
-from yookassa.domain.exceptions import ApiError as YookassaApiError
-
 
 class APIException(Exception):
     status_code: int = HTTPStatus.INTERNAL_SERVER_ERROR.value
@@ -31,36 +25,6 @@ class APIException(Exception):
             "message": self.message,
             "description": self.description,
         }
-
-
-async def api_exception_handler(request: Request, exc: APIException) -> JSONResponse:  # noqa
-    return JSONResponse(
-        status_code=exc.status_code,
-        content=exc.details,
-        headers=exc.headers
-    )
-
-
-async def db_exception_handler(request: Request, exc: SQLAlchemyError) -> JSONResponse:  # noqa
-    return JSONResponse(
-        status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
-        content={
-            "message": "Oops! Something went wrong!",
-        }
-    )
-
-
-async def yookassa_api_exception_handler(request: Request, exc: YookassaApiError) -> JSONResponse:  # noqa
-    return JSONResponse(
-        status_code=exc.HTTP_CODE,
-        content=exc.content
-    )
-
-
-def init_exception_handlers(app: FastAPI) -> None:
-    app.add_exception_handler(APIException, api_exception_handler)  # noqa
-    app.add_exception_handler(SQLAlchemyError, db_exception_handler)  # noqa
-    app.add_exception_handler(YookassaApiError, yookassa_api_exception_handler)  # noqa
 
 
 class TooManyRequestsException(APIException):

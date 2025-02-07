@@ -14,3 +14,9 @@ class PaginationResponse[T](BaseModel):
 
 class Message(BaseModel):
     message: str
+
+
+class APIResponse[T](BaseModel):
+    ok: bool
+    result: T | None = None
+    error: str | None = None

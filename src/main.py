@@ -6,7 +6,7 @@ from fastapi import FastAPI, Depends
 from api import init_api_router
 from api.metrics import init_metrics
 from core.container import Container
-from core.exceptions import init_exception_handlers
+from core.exception_handlers import init_exception_handlers
 from core.settings import settings
 from middlewares import init_middlewares
 from middlewares.limiter import Limiter

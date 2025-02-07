@@ -14,14 +14,15 @@ from schemas.hotel import (
     HotelParams,
     HotelUpdate
 )
-from schemas.response import PaginationResponse
+from schemas.response import PaginationResponse, APIResponse
 
 router = APIRouter(prefix="/hotels", tags=["hotels"])
 
 
 @router.post(
     path="/",
-    response_model=HotelCreateResponse,
+    response_model=APIResponse[HotelCreateResponse],
+    response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(get_current_admin)],
     responses={
@@ -35,12 +36,17 @@ async def add_hotel(
         schema: HotelCreateRequest,
         hotel_use_case: IHotelUseCase = Depends(Provide[Container.hotel_use_case])
 ):
-    return await hotel_use_case.add_hotel(schema=schema)
+    result = await hotel_use_case.add_hotel(schema=schema)
+    return APIResponse(
+        ok=True,
+        result=result
+    )
 
 
 @router.get(
     path="/{hotel_id}",
-    response_model=HotelResponse,
+    response_model=APIResponse[HotelResponse],
+    response_model_exclude_none=True,
     responses={
         status.HTTP_404_NOT_FOUND: {
             "description": "Hotel not found"
@@ -53,12 +59,17 @@ async def get_hotel_by_id(
         hotel_id: int,
         hotel_use_case: IHotelUseCase = Depends(Provide[Container.hotel_use_case])
 ):
-    return await hotel_use_case.get_hotel_by_id(hotel_id=hotel_id)
+    result = await hotel_use_case.get_hotel_by_id(hotel_id=hotel_id)
+    return APIResponse(
+        ok=True,
+        result=result
+    )
 
 
 @router.get(
     path="/",
-    response_model=PaginationResponse[HotelResponse]
+    response_model=APIResponse[PaginationResponse[HotelResponse]],
+    response_model_exclude_none=True,
 )
 @cache(expire=120)
 @inject
@@ -66,12 +77,17 @@ async def get_hotels(
         params: Annotated[HotelParams, Query()],
         hotel_use_case: IHotelUseCase = Depends(Provide[Container.hotel_use_case])
 ):
-    return await hotel_use_case.get_hotels(params=params)
+    result = await hotel_use_case.get_hotels(params=params)
+    return APIResponse(
+        ok=True,
+        result=result
+    )
 
 
 @router.patch(
     path="/{hotel_id}",
-    response_model=HotelUpdate,
+    response_model=APIResponse[HotelUpdate],
+    response_model_exclude_none=True,
     dependencies=[Depends(get_current_admin)],
     responses={
         status.HTTP_400_BAD_REQUEST: {
@@ -85,4 +101,8 @@ async def update_hotel(
         schema: HotelUpdate,
         hotel_use_case: IHotelUseCase = Depends(Provide[Container.hotel_use_case])
 ):
-    return await hotel_use_case.update_hotel(hotel_id=hotel_id, schema=schema)
+    result = await hotel_use_case.update_hotel(hotel_id=hotel_id, schema=schema)
+    return APIResponse(
+        ok=True,
+        result=result
+    )
